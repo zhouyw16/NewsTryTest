@@ -1,4 +1,4 @@
-package com.java.chtzyw;
+package com.java.chtzyw.main;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,22 +11,31 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
 
-import com.java.chtzyw.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
+import com.java.chtzyw.R;
 import com.java.chtzyw.data.JsonTestActivity;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-    public final String TAG="MainActivity";
+
+    private int currNavigationId = R.id.nav_home;
+    private Toolbar mToolBar;
+    private Fragment mNews, mFavourite, mSetting;
+    private NavigationView mNavigationView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        mToolBar = findViewById(R.id.toolbar);
+        setSupportActionBar(mToolBar);
+
+
+
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -41,13 +50,22 @@ public class MainActivity extends AppCompatActivity
                         }).show();
             }
         });
+
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        NavigationView navigationView = findViewById(R.id.nav_view);
+        mNavigationView = findViewById(R.id.nav_view);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                this, drawer, mToolBar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-        navigationView.setNavigationItemSelectedListener(this);
+        mNavigationView.setNavigationItemSelectedListener(this);
+
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        switchNavigation(currNavigationId);
     }
 
     @Override
@@ -88,22 +106,42 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_home) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_tools) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }
+        switchNavigation(id);
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    private void switchNavigation(int id) {
+        currNavigationId = id;
+        switch (id) {
+            case R.id.nav_home:       switchToNews();       break;
+            case R.id.nav_favourite:  switchToFavourite();  break;
+            case R.id.nav_setting:    switchToSetting();    break;
+            default:    break;
+        }
+    }
+
+    private void switchToNews() {
+        switchTo(R.id.nav_home, "新闻");
+        if (mNews == null)
+            mNews = NewsFragment.newInstance();
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.frame_content, mNews).commit();
+    }
+
+    private void switchToSetting() {
+        switchTo(R.id.nav_setting, "设置");
+    }
+
+    private void switchToFavourite() {
+        switchTo(R.id.nav_favourite, "收藏");
+    }
+
+    private void switchTo(int id, String title) {
+        mToolBar.setTitle(title);
+        mNavigationView.setCheckedItem(id);
+    }
+
 }
