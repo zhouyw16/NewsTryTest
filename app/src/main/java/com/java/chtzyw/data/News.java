@@ -1,4 +1,4 @@
-package com.example.newstrytest;
+package com.java.chtzyw.data;
 
 import java.util.List;
 
