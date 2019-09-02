@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         mToolBar = findViewById(R.id.toolbar);
         setSupportActionBar(mToolBar);
+
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         mNavigationView = findViewById(R.id.nav_view);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
