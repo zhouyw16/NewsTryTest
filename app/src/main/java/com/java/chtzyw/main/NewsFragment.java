@@ -23,7 +23,7 @@ public class NewsFragment extends Fragment {
 
     private TabLayout tabLayout;
     private List<Category> categories = Category.getDefaultCategoryList();
-    private String keyWord;
+//    private String keyWord = "";
     private ViewPager viewPager;
     private MyPageAdapter pageAdapter;
 
@@ -57,15 +57,15 @@ public class NewsFragment extends Fragment {
         return view;
     }
 
-    public void setKeyword(String keyWord) {
-        this.keyWord = keyWord;
-        pageAdapter.notifyDataSetChanged();
-    }
+//    public void setKeyword(String keyWord) {
+//        this.keyWord = keyWord;
+//        pageAdapter.notifyDataSetChanged();
+//    }
 
     private class MyPageAdapter extends FragmentStatePagerAdapter {
         private List<Category> categories;
 
-        public  MyPageAdapter(FragmentManager fm, List<Category> list) {
+        MyPageAdapter(FragmentManager fm, List<Category> list) {
             super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
             categories = list;
         }
@@ -79,14 +79,15 @@ public class NewsFragment extends Fragment {
         @NonNull
         @Override
         public Fragment getItem(int position) {
-            return NewsListFragment.newInstance(categories.get(position).idx, keyWord);
+            Category cat = categories.get(position);
+            return NewsListFragment.newInstance(cat.idx, cat.title);
         }
 
         @NonNull
         @Override
         public Object instantiateItem(@NonNull ViewGroup container, int position) {
             NewsListFragment f = (NewsListFragment) super.instantiateItem(container, position);
-            f.setKeyWord(keyWord);
+//            f.setKeyWord(keyWord);
             return f;
         }
 

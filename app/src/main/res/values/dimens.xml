@@ -21,4 +21,12 @@
     <color name="colorTitle">#CCCCCC</color>
     <color name="colorText">#CCCCCC</color>
     <color name="colorDetail">#777777</color>
+
+    <color name="colorDivider">#FFFFFF</color>
+
+    <dimen name="list_image_height">64dp</dimen>
+    <dimen name="list_image_width">96dp</dimen>
+    <dimen name="list_padding">10dp</dimen>
+    <dimen name="item_padding">10dp</dimen>
+    <dimen name="item_height">90dp</dimen>
 </resources>

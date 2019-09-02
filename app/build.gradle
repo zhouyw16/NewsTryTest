@@ -35,5 +35,12 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.1.0'
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'androidx.viewpager:viewpager:1.0.0'
+<<<<<<< HEAD
     implementation 'com.squareup.retrofit2:retrofit:2.6.1'
+=======
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'com.github.bumptech.glide:glide:4.4.0'
+>>>>>>> 971eb0f997fdc7c0a8ec081a2e6bd2efad59b410
 }
