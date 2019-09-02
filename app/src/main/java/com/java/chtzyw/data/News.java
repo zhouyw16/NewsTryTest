@@ -20,9 +20,24 @@ public class News {
     private List<Where> where;
     private String category;
     private List<Who> who;
+    private transient boolean hasRead=false;
 
     public String getImage() {
         return image;
+    }
+    public String getCover(){
+        String[] images=image.split(",");
+        if(images.length==0||images[0].isEmpty())
+            return null;
+        else
+            return images[0];
+    }
+    public String[] getImages(){
+        String[] images=image.split(",");
+        if(images.length==0||images[0].isEmpty())
+            return null;
+        else
+            return images;
     }
     public void setImage(String image) {
         this.image = image;
@@ -123,6 +138,12 @@ public class News {
     public void setWho(List<Who> who) {
         this.who = who;
     }
+    public boolean getHasRead(){
+        return hasRead;
+    }
+    public void setHasRead(){
+        this.hasRead=hasRead;
+    }
 }
 
 class Keywords{
@@ -172,7 +193,7 @@ class Where{
     private String word;
 }
 
-class Who{
+class Who {
     private String score;
     private String word;
 }

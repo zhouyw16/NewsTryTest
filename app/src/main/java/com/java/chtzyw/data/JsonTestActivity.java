@@ -1,10 +1,12 @@
 package com.java.chtzyw.data;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -57,6 +59,8 @@ public class JsonTestActivity extends AppCompatActivity implements View.OnClickL
         }
         else if(view.getId()==R.id.read_json){
             showArticle(fileLoad("201907030137e6a3d6e14b7642539bf3df0daf3ba2c4"));
+//            imageView=(ImageView)findViewById(R.id.image_view);
+//            imageView.setImageURI(Uri.fromFile(new File("C:/Users/lenovo/Desktop/img.jpeg")));
         }
     }
 
