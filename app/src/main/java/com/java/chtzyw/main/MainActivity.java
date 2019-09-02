@@ -17,7 +17,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.java.chtzyw.R;
-import com.java.chtzyw.data.JsonTestActivity;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -33,23 +32,6 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         mToolBar = findViewById(R.id.toolbar);
         setSupportActionBar(mToolBar);
-
-
-
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                Intent intent=new Intent(MainActivity.this, JsonTestActivity.class);
-                                startActivity(intent);
-                            }
-                        }).show();
-            }
-        });
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         mNavigationView = findViewById(R.id.nav_view);
