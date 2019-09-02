@@ -1,10 +1,8 @@
 package com.java.chtzyw.main;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -14,11 +12,8 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
-import com.google.android.material.snackbar.Snackbar;
 import com.java.chtzyw.R;
-import com.java.chtzyw.data.JsonTestActivity;
 
 // 主活动，管理导航栏和工具栏的响应事件
 public class MainActivity extends AppCompatActivity
