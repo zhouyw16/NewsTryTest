@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,55 +20,41 @@ import com.google.android.material.snackbar.Snackbar;
 import com.java.chtzyw.R;
 import com.java.chtzyw.data.JsonTestActivity;
 
+// 主活动，管理导航栏和工具栏的响应事件
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private int currNavigationId = R.id.nav_home;
-    private Toolbar mToolBar;
-    private Fragment mNews, mFavourite, mSetting;
-    private NavigationView mNavigationView;
+    private int currNavigationId = R.id.nav_home;   // 当前导航栏选中页面的id
+    private Toolbar mToolBar;                       // 工具栏
+    private Fragment mNews, mFavourite, mSetting;   // 导航栏的各种不同页面
+    private NavigationView mNavigationView;         // 导航栏
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // 导航栏布局自动生成的代码
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mToolBar = findViewById(R.id.toolbar);
         setSupportActionBar(mToolBar);
-
-
-
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                Intent intent=new Intent(MainActivity.this, JsonTestActivity.class);
-                                startActivity(intent);
-                            }
-                        }).show();
-            }
-        });
-
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         mNavigationView = findViewById(R.id.nav_view);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, mToolBar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
+
+        // 设置导航栏切换的回调函数
         mNavigationView.setNavigationItemSelectedListener(this);
-
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        // 回到主页面时切换到当前的页面
         switchNavigation(currNavigationId);
     }
 
+    // 返回键回退导航栏
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -78,6 +65,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    // 创建右上角的菜单
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -85,6 +73,7 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    // 右上角菜单的响应事件
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -94,25 +83,29 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            return true;
+            Toast.makeText(this, "你点击了右上角的菜单！\n但是现在还没有实现功能！",
+                    Toast.LENGTH_LONG).show();
         }
 
         return super.onOptionsItemSelected(item);
     }
 
+    // 导航栏的响应事件
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
+        // 切换到响应页面
         int id = item.getItemId();
-
         switchNavigation(id);
 
+        // 回退导航栏
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
+
+    // 切换页面的一些辅助函数
     private void switchNavigation(int id) {
         currNavigationId = id;
         switch (id) {
@@ -133,10 +126,12 @@ public class MainActivity extends AppCompatActivity
 
     private void switchToSetting() {
         switchTo(R.id.nav_setting, "设置");
+        Toast.makeText(this, "假装切换到了设置页面！", Toast.LENGTH_SHORT).show();
     }
 
     private void switchToFavourite() {
         switchTo(R.id.nav_favourite, "收藏");
+        Toast.makeText(this, "假装切换到了收藏页面！", Toast.LENGTH_SHORT).show();
     }
 
     private void switchTo(int id, String title) {

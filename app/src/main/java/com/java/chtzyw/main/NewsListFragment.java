@@ -19,12 +19,6 @@ import android.widget.Toast;
 
 import com.java.chtzyw.R;
 
-
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link NewsListFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class NewsListFragment extends Fragment {
 
 //    private static final String ARG_KEYWORD = "keyWord";
@@ -60,7 +54,9 @@ public class NewsListFragment extends Fragment {
             mCategory = getArguments().getInt(ARG_CATEGORY);
         }
         mAdapter = new NewsListAdapter(getContext());
-
+        mAdapter.setOnItemClickListener((View itemView, int position) -> {
+            Toast.makeText(getActivity(), "假装打开了新闻页", Toast.LENGTH_LONG).show();
+        });
     }
 
     @Override
@@ -73,15 +69,8 @@ public class NewsListFragment extends Fragment {
         // 设置下拉进度的主题颜色
         swipeRefreshLayout.setColorSchemeResources(R.color.colorAccent, R.color.colorPrimary, R.color.colorPrimaryDark);
         swipeRefreshLayout.setOnRefreshListener(() -> {
-
-                // 开始刷新，设置当前为刷新状态
-                //swipeRefreshLayout.setRefreshing(true);
-
-                // 这里是主线程
-                // 一些比较耗时的操作，比如联网获取数据，需要放到子线程去执行
-
                 new Handler().postDelayed(() -> {
-                        Toast.makeText(getActivity(), "刷新了一条数据", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), "假装刷新了一条数据", Toast.LENGTH_SHORT).show();
                         // 加载完数据设置为不刷新状态，将下拉进度收起来
                         swipeRefreshLayout.setRefreshing(false);
                 }, 1200);
@@ -110,12 +99,4 @@ public class NewsListFragment extends Fragment {
         });
         return view;
     }
-
-//    public void setKeyWord(String keyWord) {
-//        mKeyWord = keyWord;
-//        Bundle args = this.getArguments();
-//        args.putString(ARG_KEYWORD, keyWord);
-//        this.setArguments(args);
-//    }
-
 }

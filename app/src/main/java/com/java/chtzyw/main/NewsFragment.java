@@ -29,10 +29,7 @@ public class NewsFragment extends Fragment {
 
     public NewsFragment() {}
 
-    public static NewsFragment newInstance() {
-        NewsFragment fragment = new NewsFragment();
-        return fragment;
-    }
+    public static NewsFragment newInstance() { return new NewsFragment(); }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -40,13 +37,15 @@ public class NewsFragment extends Fragment {
         pageAdapter = new MyPageAdapter(getChildFragmentManager(), categories);
     }
 
+    // 创建视图
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.news_page, container, false);
         tabLayout = view.findViewById(R.id.tab_layout);
         viewPager = view.findViewById(R.id.view_pager);
+
+        // 设置缓存的页面数量，前后各3个
         viewPager.setOffscreenPageLimit(3);
 
         for (int i = 0; i < categories.size(); i++)
@@ -72,9 +71,7 @@ public class NewsFragment extends Fragment {
 
         @Nullable
         @Override
-        public CharSequence getPageTitle(int position) {
-            return categories.get(position).title;
-        }
+        public CharSequence getPageTitle(int position) { return categories.get(position).title; }
 
         @NonNull
         @Override
@@ -92,20 +89,14 @@ public class NewsFragment extends Fragment {
         }
 
         @Override
-        public int getCount() {
-            return categories.size();
-        }
+        public int getCount() { return categories.size(); }
 
         @Override
-        public int getItemPosition(@NonNull Object object) {
-            return POSITION_NONE;
-        }
+        public int getItemPosition(@NonNull Object object) { return POSITION_NONE; }
 
         @Nullable
         @Override
-        public Parcelable saveState() {
-            return null;
-        }
+        public Parcelable saveState() { return null; }
     }
 
 }
