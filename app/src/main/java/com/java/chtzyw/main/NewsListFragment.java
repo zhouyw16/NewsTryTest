@@ -22,14 +22,18 @@ import android.widget.Toast;
 
 import com.java.chtzyw.R;
 import com.java.chtzyw.data.News;
+import com.java.chtzyw.data.NewsHandler;
+import com.java.chtzyw.data.ResultListener;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import static androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_DRAGGING;
 import static androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_SETTLING;
 
 public class NewsListFragment extends Fragment {
+    private static final int NEWS_NUM = 15;
 
 //    private static final String ARG_KEYWORD = "keyWord";
     private static final String ARG_CATEGORY = "mCategory";
@@ -62,7 +66,7 @@ public class NewsListFragment extends Fragment {
 //            mKeyWord = getArguments().getString(ARG_KEYWORD);
             mCategory = getArguments().getInt(ARG_CATEGORY);
         }
-        mAdapter = new NewsListAdapter(getContext());
+        mAdapter = new NewsListAdapter(getContext(), mCategory);
         mAdapter.setOnItemClickListener((View itemView, int position) -> {
             Toast.makeText(getActivity(), "假装打开了新闻页", Toast.LENGTH_LONG).show();
         });
@@ -79,19 +83,22 @@ public class NewsListFragment extends Fragment {
         swipeRefreshLayout.setColorSchemeResources(R.color.colorAccent, R.color.colorPrimary, R.color.colorPrimaryDark);
         
         swipeRefreshLayout.setOnRefreshListener(() -> {
-                new Handler().postDelayed(() -> {
-                        Toast.makeText(getActivity(), "假装刷新了一条数据", Toast.LENGTH_SHORT).show();
-                        // 加载完数据设置为不刷新状态，将下拉进度收起来
-                        swipeRefreshLayout.setRefreshing(false);
-                        List<News> list = new ArrayList<>();
-                        for (int i = 0; i < 15; i++) {
-                            News news = new News();
-                            news.setTitle("latest news" + i);
-                            list.add(news);
-                        }
-                        mAdapter.getLatestNews(list);
-                        recyclerView.smoothScrollToPosition(0);
-                }, 1200);
+                NewsHandler.getHandler().sendRefreshRequest(mCategory, NEWS_NUM,
+                        new ResultListener() {
+                            @Override
+                            public void onSuccess(LinkedList<News> newsList, int newsNum) {
+                                mAdapter.notifyItemRangeInserted(0, newsNum);
+                                swipeRefreshLayout.setRefreshing(false);
+                                recyclerView.smoothScrollToPosition(0);
+                            }
+
+                            @Override
+                            public void onFailure(int code) {
+                                Toast.makeText(getContext(), "refresh failed!", Toast.LENGTH_SHORT).show();
+                                swipeRefreshLayout.setRefreshing(false);
+                            }
+                        });
+
         });
 
         recyclerView = view.findViewById(R.id.recycler_view);

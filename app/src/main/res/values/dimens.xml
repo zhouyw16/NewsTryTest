@@ -18,14 +18,14 @@
 
     <color name="colorBackground">#1A1A1A</color>
     <color name="colorBackgroundLight">#0D0D0D</color>
-    <color name="colorTitle">#CCCCCC</color>
+    <color name="colorDetail">#CCCCCC</color>
     <color name="colorText">#CCCCCC</color>
-    <color name="colorDetail">#777777</color>
+    <color name="colorTitle">#777777</color>
 
     <color name="colorDivider">#FFFFFF</color>
 
-    <dimen name="list_image_height">64dp</dimen>
-    <dimen name="list_image_width">96dp</dimen>
+    <dimen name="list_image_height">72dp</dimen>
+    <dimen name="list_image_width">108dp</dimen>
     <dimen name="list_padding">10dp</dimen>
     <dimen name="item_padding">10dp</dimen>
     <dimen name="item_height">90dp</dimen>

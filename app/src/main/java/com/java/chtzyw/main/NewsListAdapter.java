@@ -1,6 +1,7 @@
 package com.java.chtzyw.main;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ import com.jakewharton.rxbinding2.view.RxView;
 import com.java.chtzyw.R;
 import com.java.chtzyw.data.ImageOption;
 import com.java.chtzyw.data.News;
+import com.java.chtzyw.data.NewsHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,23 +27,20 @@ import java.util.concurrent.TimeUnit;
 
 class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
+    private static final String TAG = "NewsListAdapter";
+
     private final static int TYPE_CONTENT = 0; // 正常内容
     private final static int TYPE_FOOTER = 1;  // 下拉刷新
 
     private OnItemClickListener itemClickListener;
     private Context currContext;
-    private List<News> newsList = new ArrayList<>();
+    private List<News> newsList;
     private int NUM = 20;
 
-    public NewsListAdapter(Context context) {
+    public NewsListAdapter(Context context, int category) {
         super();
         currContext = context;
-        for (int i = 0; i < NUM; i++) {
-            News news = new News();
-            news.setTitle("demo"+i);
-            newsList.add(news);
-
-        }
+        newsList = NewsHandler.getHandler().sendInitNewsList(category);
     }
 
     // 长按弹出的菜单
@@ -115,10 +114,9 @@ class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         News news =  newsList.get(pos);
         ItemViewHolder item = (ItemViewHolder) holder;
         item.mTitle.setText(news.getTitle());
-//        item.mAuthor.setText(news.getPublisher());
-//        item.mDate.setText(news.getPublishTime());
-//        item.setImage(news.getImage());
-
+        item.mAuthor.setText(news.getPublisher());
+        item.mDate.setText(news.getPublishTime());
+        item.setImage(news.getCover());
     }
 
     @Override
@@ -155,8 +153,9 @@ class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
 
         public void setImage(String url) {
-            if (url == null)
+            if (url == null) {
                 mImage.setVisibility(View.GONE);
+            }
             else {
                 mImage.setVisibility(View.VISIBLE);
                 Glide.with(mView).load(url).apply(ImageOption.miniImgOption()).into(mImage);

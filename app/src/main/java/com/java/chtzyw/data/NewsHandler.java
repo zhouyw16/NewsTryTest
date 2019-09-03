@@ -63,7 +63,13 @@ public class NewsHandler {
         /*缓存本地新闻*/
         Gson gson=new Gson();
         int loadNum=files.length<LOCAL_LOAD_MAX?files.length:LOCAL_LOAD_MAX;
+
+        for (String fn : files) {
+            Log.d("test1234", fn);
+        }
+
         for(int i=0;i<loadNum;i++){
+            if (files[i].contains("instant")) continue;
             News news=gson.fromJson(fileLoad(files[i]),News.class);
             allNewsList.get(0).addLast(news);
             allNewsList.get(Category.getCategoryId(news.getCategory())).addLast(news);
