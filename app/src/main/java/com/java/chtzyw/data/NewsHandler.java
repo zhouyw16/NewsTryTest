@@ -40,6 +40,7 @@ public class NewsHandler {
         return handler;
     }
     private NewsHandler(){
+        Log.d("MainActivity", "Construct");
         mContext= MainApplication.getContextObject();
         favorList=new LinkedList<>();
         newsHash=new HashSet<>();
@@ -49,12 +50,15 @@ public class NewsHandler {
         initAllNewsList();
     }
     /*将全部本地内容读取至缓存，可以考虑以下两点：
-    * 程序启动时直接创建NewsHandler对象
-    * 设置本地文件读取上限，暂定为LOCAL_LOAD_MAX条
-    * */
+     * 程序启动时直接创建NewsHandler对象
+     * 设置本地文件读取上限，暂定为LOCAL_LOAD_MAX条
+     * */
     private void initAllNewsList(){
         /*获取本地文件目录*/
-        String[] files=mContext.fileList();
+        if(mContext==null)
+            Log.d("MainActivity", "initAllNewsList: mContext=null");
+        File path=mContext.getDir("news",Context.MODE_PRIVATE);
+        File[] files=path.listFiles();
         /*创建分类链表*/
         allNewsList=new ArrayList<>();
         for(int i=0;i<12;i++){
@@ -93,6 +97,7 @@ public class NewsHandler {
                 .setSize(needNum)
                 .setCategories(categoryId)
                 .build();
+        Log.d("MainActivity", "onClick: "+httpClient.getNewsUrl());
         Request request=new Request.Builder().url(httpClient.getNewsUrl()).build();
         httpClient.getOkHttpClient().newCall(request).enqueue(new Callback() {
             @Override
@@ -120,12 +125,14 @@ public class NewsHandler {
 
     /*各分类上拉加载*/
     public void sendLoadRequest(int categoryId,int needNum,ResultListener resultListener){
+
         pageList.set(categoryId,pageList.get(categoryId)+1);
         HttpClient httpClient=new HttpClient.Builder()
                 .setSize(needNum)
                 .setCategories(categoryId)
                 .setPage(pageList.get(categoryId))
                 .build();
+        Log.d("MainActivity", "onClick: "+httpClient.getNewsUrl());
         Request request=new Request.Builder().url(httpClient.getNewsUrl()).build();
         httpClient.getOkHttpClient().newCall(request).enqueue(new Callback() {
             @Override
@@ -153,10 +160,11 @@ public class NewsHandler {
 
     /*保存新闻请求*/
     public void sendNewsSaveRequest(News news){
+        File path=mContext.getDir("news",Context.MODE_PRIVATE);
+        File file=new File(path,news.getNewsID());
         Gson gson=new Gson();
-        String content=gson.toJson(news);
-        String filename=news.getNewsID();
-        fileSave(filename,content);
+        String jsonData=gson.toJson(news);
+        fileSave(file,jsonData);
     }
 
     /*保存收藏请求*/
@@ -166,7 +174,7 @@ public class NewsHandler {
         File file=new File(path,news.getNewsID());
         Gson gson=new Gson();
         String jsonData=gson.toJson(news);
-        favorSave(file,jsonData);
+        fileSave(file,jsonData);
     }
 
     /*加载收藏请求*/
@@ -177,7 +185,7 @@ public class NewsHandler {
         if(files.length==0)
             return null;
         for(File file:files){
-            String jsonData=favorLoad(file);
+            String jsonData=fileLoad(file);
             News news=gson.fromJson(jsonData,News.class);
             favorList.addLast(news);
         }
@@ -194,63 +202,8 @@ public class NewsHandler {
         news.setImage(news.getImage().replaceAll("[\\[\\]\\s]",""));
     }
 
-    /*files文件夹读取*/
-    private String fileLoad(String filename){
-        FileInputStream in=null;
-        BufferedReader reader=null;
-        StringBuilder content=new StringBuilder();
-        try{
-            in=mContext.openFileInput(filename);
-            reader=new BufferedReader(new InputStreamReader(in));
-            String line="";
-            while((line=reader.readLine())!=null)
-                content.append(line);
-        }
-        catch (IOException e){
-            e.printStackTrace();
-        }
-        finally {
-            try{
-                if(reader!=null)
-                    reader.close();
-            }
-            catch (IOException e){
-                e.printStackTrace();
-            }
-        }
-        return content.toString();
-    }
-
-    /*files文件夹保存*/
-    private void fileSave(String filename,String inputText){
-        File file=new File(mContext.getFilesDir(),filename);
-        if(file.exists()){
-            return;
-        }
-
-        FileOutputStream out=null;
-        BufferedWriter writer=null;
-        try {
-            out=mContext.openFileOutput(filename,Context.MODE_PRIVATE);
-            writer=new BufferedWriter(new OutputStreamWriter(out));
-            writer.write(inputText);
-        }
-        catch (IOException e){
-            e.printStackTrace();
-        }
-        finally {
-            try{
-                if(writer!=null)
-                    writer.close();
-            }
-            catch (IOException e){
-                e.printStackTrace();
-            }
-        }
-    }
-
-    /*favor文件夹读取*/
-    private String favorLoad(File file){
+    /*文件读取*/
+    private String fileLoad(File file){
         FileReader in=null;
         BufferedReader reader=null;
         StringBuilder content=new StringBuilder();
@@ -276,8 +229,8 @@ public class NewsHandler {
         return content.toString();
     }
 
-    /*favor文件夹保存*/
-    private void favorSave(File file,String inputText){
+    /*文件保存*/
+    private void fileSave(File file,String inputText){
         if(file.exists()){
             return;
         }
