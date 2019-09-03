@@ -10,6 +10,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.widget.ContentLoadingProgressBar;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -23,6 +24,9 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+    private final static int TYPE_CONTENT = 0; // 正常内容
+    private final static int TYPE_FOOTER = 1;  // 下拉刷新
 
     private OnItemClickListener itemClickListener;
     private Context currContext;
@@ -63,15 +67,26 @@ class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.notifyItemRemoved(position);
     }
 
-    public void appendNewsList(List<News> list) {
-        int len = list.size();
-//        int pos = newsList.size();
+    @Override
+    public int getItemViewType(int position) {
+        if (position==newsList.size()) {
+            return TYPE_FOOTER;
+        }
+        return TYPE_CONTENT;
+    }
+
+    public void getMoreNews(List<News> list) {
+        int num = list.size();
+        int pos = newsList.size();
+        newsList.addAll(list);
+        this.notifyItemRangeInserted(pos, num);
+    }
+
+    public void getLatestNews(List<News> list) {
+        int num = list.size();
         list.addAll(newsList);
         newsList = list;
-//        newsList.addAll(list);
-//        this.notifyItemRangeChanged(pos, newsList.size());
-//        this.notifyDataSetChanged();
-        this.notifyItemRangeInserted(0, len);
+        this.notifyItemRangeInserted(0, num);
     }
 
     public void setOnItemClickListener(OnItemClickListener listener) {
@@ -81,12 +96,22 @@ class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.news_item, parent, false);
-        return new ItemViewHolder(view);
+        if (viewType == TYPE_CONTENT) {
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.news_item, parent, false);
+            return new ItemViewHolder(view);
+        }
+        else {
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.news_item_footer, parent, false);
+            return new FooterViewHolder(view);
+        }
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int pos) {
+        if (getItemViewType(pos) == TYPE_FOOTER) return;
+
         News news =  newsList.get(pos);
         ItemViewHolder item = (ItemViewHolder) holder;
         item.mTitle.setText(news.getTitle());
@@ -98,7 +123,7 @@ class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public int getItemCount() {
-        return newsList.size();
+        return newsList.size() + 1;
     }
 
     public interface OnItemClickListener {
@@ -150,6 +175,15 @@ class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             if (itemClickListener != null) {
                 itemClickListener.onItemClick(view, this.getLayoutPosition());
             }
+        }
+    }
+
+    private class FooterViewHolder extends RecyclerView.ViewHolder {
+        private ContentLoadingProgressBar progressBar;
+
+        public FooterViewHolder(View view) {
+            super(view);
+            progressBar = view.findViewById(R.id.scrollup_progressbar);
         }
     }
 }

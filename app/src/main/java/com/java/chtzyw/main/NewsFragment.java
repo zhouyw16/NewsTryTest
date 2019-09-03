@@ -45,6 +45,12 @@ public class NewsFragment extends Fragment {
         tabLayout = view.findViewById(R.id.tab_layout);
         viewPager = view.findViewById(R.id.view_pager);
 
+        return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
         // 设置缓存的页面数量，前后各3个
         viewPager.setOffscreenPageLimit(3);
 
@@ -53,10 +59,9 @@ public class NewsFragment extends Fragment {
 
         viewPager.setAdapter(pageAdapter);
         tabLayout.setupWithViewPager(viewPager);
-        return view;
     }
 
-//    public void setKeyword(String keyWord) {
+    //    public void setKeyword(String keyWord) {
 //        this.keyWord = keyWord;
 //        pageAdapter.notifyDataSetChanged();
 //    }

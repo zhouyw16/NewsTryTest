@@ -95,8 +95,8 @@ public class MainActivity extends AppCompatActivity
         switchNavigation(id);
 
         // 回退导航栏
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
+//        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+//        drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
@@ -122,12 +122,18 @@ public class MainActivity extends AppCompatActivity
 
     private void switchToSetting() {
         switchTo(R.id.nav_setting, "设置");
-        Toast.makeText(this, "假装切换到了设置页面！", Toast.LENGTH_SHORT).show();
+        if (mSetting == null)
+            mSetting = SettingFragment.newInstance();
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.frame_content, mSetting).commit();
     }
 
     private void switchToFavourite() {
         switchTo(R.id.nav_favourite, "收藏");
-        Toast.makeText(this, "假装切换到了收藏页面！", Toast.LENGTH_SHORT).show();
+        if (mFavourite == null)
+            mFavourite = FavouriteFragment.newInstance("favourite", "demo");
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.frame_content, mFavourite).commit();
     }
 
     private void switchTo(int id, String title) {

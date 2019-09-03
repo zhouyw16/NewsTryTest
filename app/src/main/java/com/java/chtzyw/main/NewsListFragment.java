@@ -5,7 +5,6 @@ import android.content.Context;
 import android.graphics.PointF;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -27,6 +26,9 @@ import com.java.chtzyw.data.News;
 import java.util.ArrayList;
 import java.util.List;
 
+import static androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_DRAGGING;
+import static androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_SETTLING;
+
 public class NewsListFragment extends Fragment {
 
 //    private static final String ARG_KEYWORD = "keyWord";
@@ -43,7 +45,6 @@ public class NewsListFragment extends Fragment {
 
     public NewsListFragment() {}
 
-    // TODO: Rename and change types and number of parameters
     public static NewsListFragment newInstance(int idx, String keyWord) {
         NewsListFragment fragment = new NewsListFragment();
         Bundle args = new Bundle();
@@ -76,6 +77,7 @@ public class NewsListFragment extends Fragment {
         swipeRefreshLayout.setProgressBackgroundColorSchemeResource(android.R.color.white);
         // 设置下拉进度的主题颜色
         swipeRefreshLayout.setColorSchemeResources(R.color.colorAccent, R.color.colorPrimary, R.color.colorPrimaryDark);
+        
         swipeRefreshLayout.setOnRefreshListener(() -> {
                 new Handler().postDelayed(() -> {
                         Toast.makeText(getActivity(), "假装刷新了一条数据", Toast.LENGTH_SHORT).show();
@@ -84,10 +86,10 @@ public class NewsListFragment extends Fragment {
                         List<News> list = new ArrayList<>();
                         for (int i = 0; i < 15; i++) {
                             News news = new News();
-                            news.setTitle("add news" + i);
+                            news.setTitle("latest news" + i);
                             list.add(news);
                         }
-                        mAdapter.appendNewsList(list);
+                        mAdapter.getLatestNews(list);
                         recyclerView.smoothScrollToPosition(0);
                 }, 1200);
         });
@@ -102,20 +104,58 @@ public class NewsListFragment extends Fragment {
         DividerItemDecoration divider = new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL);
         divider.setDrawable(getContext().getDrawable(R.drawable.divider));
         recyclerView.addItemDecoration(divider);
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        recyclerView.addOnScrollListener(new OnLoadMoreListener() {
             @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-            }
-
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
+            protected void onLoading(int countItem, int lastItem) {
+                new Handler().postDelayed(() -> {
+                    Toast.makeText(getActivity(), "假装加载了一条数据", Toast.LENGTH_SHORT).show();
+                    // 加载完数据设置为不刷新状态，将下拉进度收起来
+                    swipeRefreshLayout.setRefreshing(false);
+                    List<News> list = new ArrayList<>();
+                    for (int i = 0; i < 15; i++) {
+                        News news = new News();
+                        news.setTitle("more news" + i);
+                        list.add(news);
+                    }
+                    mAdapter.getMoreNews(list);
+                }, 1200);
             }
         });
         return view;
     }
 
+    // 下拉刷新的监听器
+    public abstract class OnLoadMoreListener extends RecyclerView.OnScrollListener {
+        private int countItem;
+        private int lastItem;
+        private boolean isScolled = false;//是否可以滑动
+        private RecyclerView.LayoutManager layoutManager;
+
+        /**
+         * 加载回调方法
+         * @param countItem 总数量
+         * @param lastItem  最后显示的position
+         */
+        protected abstract void onLoading(int countItem, int lastItem);
+
+        @Override
+        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            //拖拽或者惯性滑动时isScolled设置为true
+            if (newState == SCROLL_STATE_DRAGGING || newState == SCROLL_STATE_SETTLING) {
+                isScolled = true;
+            } else { isScolled = false; }
+        }
+
+        @Override
+        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            layoutManager = recyclerView.getLayoutManager();
+            countItem = layoutManager.getItemCount();
+            lastItem = ((LinearLayoutManager) layoutManager).findLastCompletelyVisibleItemPosition();
+            if (isScolled && countItem != lastItem && lastItem == countItem - 1) {
+                onLoading(countItem, lastItem);
+            }
+        }
+    }
 
 
     // 设置自动滑动速度的类，重写了LinearLayoutManger中的几个方法
