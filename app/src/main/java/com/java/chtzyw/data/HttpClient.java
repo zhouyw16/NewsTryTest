@@ -5,66 +5,87 @@ import android.util.ArrayMap;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
 public class HttpClient {
-    public final static String BASE_URL="https://api2.newsminer.net/svc/news/queryNewsList";
-    public static String newsUrl=BASE_URL;
+
+    /*单例模式，仅允许通过builder创建*/
     private static HttpClient client;
-    private static OkHttpClient okHttpClient;
     private HttpClient(){
         okHttpClient=new OkHttpClient.Builder().build();
     }
-    public static HttpClient getClient(){
+    private static HttpClient getClient(){
         if(client==null)
             client=new HttpClient();
         return client;
     }
-    public static OkHttpClient getOkHttpClient(){
-        return okHttpClient;
-    }
+
+    private static String newsUrl;
+    private static OkHttpClient okHttpClient;
     public static String getNewsUrl(){
         return newsUrl;
     }
+    public static OkHttpClient getOkHttpClient(){
+        return okHttpClient;
+    }
 
     public static final class Builder{
-        private String baseUrl=BASE_URL;
-        private String url;
-        private Map<String,String> params=new ArrayMap<>();
+        private String baseUrl;
+        private String size;
+        private String startDate;
+        private String endDate;
+        private String words;
+        private String categories;
+        private String page;
 
-        public Builder(){}
+        public Builder(){
+            baseUrl="https://api2.newsminer.net/svc/news/queryNewsList";
+            size="";
+            startDate="";
+            SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date date=new Date(System.currentTimeMillis());
+            endDate="endDate="+simpleDateFormat.format(date)+"&";
+            words="";
+            categories="";
+            page="page=1";
+        }
         public Builder setBaseUrl(String baseUrl){
             this.baseUrl=baseUrl;
             return this;
         }
-        public Builder setUrl(String url){
-            this.url=url;
+        public Builder setSize(int size){
+            this.size="size="+size+"&";
             return this;
         }
-        public Builder setParams(String key,String value){
-            this.params.put(key,value);
+        public Builder setStartDate(String startDate){
+            this.startDate="startDate="+startDate+"&";
+            return this;
+        }
+        public Builder setEndDate(String endDate) {
+            this.endDate = "endDate="+endDate+"&";
+            return this;
+        }
+        public Builder setWords(String words) {
+            this.words ="words="+words+"&";
+            return this;
+        }
+        public Builder setCategories(int categories){
+            if(categories>1)
+                this.categories="categories="+Category.DEFAULT_CATEGORIES[categories]+"&";
+            return this;
+        }
+        public Builder setPage(int page){
+            this.page="page="+page;
             return this;
         }
         public HttpClient build(){
-            newsUrl=getUrl();
+            newsUrl=baseUrl+"?"+size+startDate+endDate+words+categories+page;
             HttpClient client= HttpClient.getClient();
             return client;
-        }
-        private String getUrl(){
-            String value="";
-            if(!params.isEmpty()){
-                for(Map.Entry<String,String> entry:params.entrySet()){
-                    value+=value.equals("")?"?":"&";
-                    value+=entry.getKey()+"="+entry.getValue();
-                }
-            }
-            return baseUrl+value;
         }
     }
 }
