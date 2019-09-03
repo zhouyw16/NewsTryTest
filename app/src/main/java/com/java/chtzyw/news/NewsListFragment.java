@@ -1,4 +1,4 @@
-package com.java.chtzyw.main;
+package com.java.chtzyw.news;
 
 
 import android.content.Context;
@@ -7,13 +7,11 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
-import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,40 +19,27 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.java.chtzyw.R;
-import com.java.chtzyw.data.News;
-import com.java.chtzyw.data.NewsHandler;
-import com.java.chtzyw.data.ResultListener;
-
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-
-import static androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_DRAGGING;
-import static androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_SETTLING;
 
 public class NewsListFragment extends Fragment {
-    private static final int NEWS_NUM = 15;
 
-//    private static final String ARG_KEYWORD = "keyWord";
+    public  static final int GET_NEW = 1;  // 上拉刷新
+    public  static final int GET_MORE = 2; // 下拉加载
     private static final String ARG_CATEGORY = "mCategory";
-
-    private int mCategory;
-//    private String mKeyWord;
 
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
     private LinearLayoutManager layoutManager;
-    private NewsListAdapter mAdapter;
+
+    private NewsListAdapter mAdapter;      // recyclerview的适配器
+    private NewsListPresenter mPresenter;  // 新闻事务管理类
 
 
     public NewsListFragment() {}
 
-    public static NewsListFragment newInstance(int idx, String keyWord) {
+    public static NewsListFragment newInstance(int category) {
         NewsListFragment fragment = new NewsListFragment();
         Bundle args = new Bundle();
-//        args.putString(ARG_KEYWORD, keyWord);
-        args.putInt(ARG_CATEGORY, idx);
-
+        args.putInt(ARG_CATEGORY, category);
         fragment.setArguments(args);
         return fragment;
     }
@@ -62,105 +47,89 @@ public class NewsListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        int category = -1;
         if (getArguments() != null) {
-//            mKeyWord = getArguments().getString(ARG_KEYWORD);
-            mCategory = getArguments().getInt(ARG_CATEGORY);
+            category = getArguments().getInt(ARG_CATEGORY);
         }
-        mAdapter = new NewsListAdapter(getContext(), mCategory);
-        mAdapter.setOnItemClickListener((View itemView, int position) -> {
-            Toast.makeText(getActivity(), "假装打开了新闻页", Toast.LENGTH_LONG).show();
-        });
+        mAdapter = new NewsListAdapter(getContext(), category);
+        mPresenter = new NewsListPresenter(this, mAdapter, category);
+        mAdapter.setOnItemClickListener((news)->mPresenter.openNewsDetail(news));
+
+        // 如果本地没有缓存，则初始先加载一批新闻
+        if (mAdapter.getItemCount() == 0)
+            mPresenter.firstGet();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+        // 配置swiperefreshlayout的样式
         View view = inflater.inflate(R.layout.news_list, container, false);
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_widget);
         swipeRefreshLayout.setProgressBackgroundColorSchemeResource(android.R.color.white);
-        // 设置下拉进度的主题颜色
         swipeRefreshLayout.setColorSchemeResources(R.color.colorAccent, R.color.colorPrimary, R.color.colorPrimaryDark);
-        
-        swipeRefreshLayout.setOnRefreshListener(() -> {
-                NewsHandler.getHandler().sendRefreshRequest(mCategory, NEWS_NUM,
-                        new ResultListener() {
-                            @Override
-                            public void onSuccess(LinkedList<News> newsList, int newsNum) {
-                                mAdapter.notifyItemRangeInserted(0, newsNum);
-                                swipeRefreshLayout.setRefreshing(false);
-                                recyclerView.smoothScrollToPosition(0);
-                            }
+        // 下拉刷新监听器
+        swipeRefreshLayout.setOnRefreshListener(() -> mPresenter.getLatestNews());
 
-                            @Override
-                            public void onFailure(int code) {
-                                Toast.makeText(getContext(), "refresh failed!", Toast.LENGTH_SHORT).show();
-                                swipeRefreshLayout.setRefreshing(false);
-                            }
-                        });
-
-        });
-
+        // 配置recyclerview的样式
         recyclerView = view.findViewById(R.id.recycler_view);
-
         layoutManager = new ScrollSpeedLinearLayoutManger(getContext());
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(mAdapter);
-        DividerItemDecoration divider = new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL);
-        divider.setDrawable(getContext().getDrawable(R.drawable.divider));
-        recyclerView.addItemDecoration(divider);
-        recyclerView.addOnScrollListener(new OnLoadMoreListener() {
-            @Override
-            protected void onLoading(int countItem, int lastItem) {
-                new Handler().postDelayed(() -> {
-                    Toast.makeText(getActivity(), "假装加载了一条数据", Toast.LENGTH_SHORT).show();
-                    // 加载完数据设置为不刷新状态，将下拉进度收起来
-                    swipeRefreshLayout.setRefreshing(false);
-                    List<News> list = new ArrayList<>();
-                    for (int i = 0; i < 15; i++) {
-                        News news = new News();
-                        news.setTitle("more news" + i);
-                        list.add(news);
-                    }
-                    mAdapter.getMoreNews(list);
-                }, 1200);
-            }
-        });
+        // 上拉加载监听器
+        recyclerView.addOnScrollListener(new OnLoadMoreListener());
         return view;
     }
 
-    // 下拉刷新的监听器
-    public abstract class OnLoadMoreListener extends RecyclerView.OnScrollListener {
-        private int countItem;
-        private int lastItem;
-        private boolean isScolled = false;//是否可以滑动
-        private RecyclerView.LayoutManager layoutManager;
+    // 加载新闻成功，更新ui
+    void onSuccess(int newsNum, int mode) {
+        String text = newsNum == 0 ? "当前已是最新新闻" : ("刷新了"+newsNum+"条新闻");
+        getActivity().runOnUiThread(() -> {
+            Toast.makeText(getContext(), text, Toast.LENGTH_SHORT).show();
+        });
 
-        /**
-         * 加载回调方法
-         * @param countItem 总数量
-         * @param lastItem  最后显示的position
-         */
-        protected abstract void onLoading(int countItem, int lastItem);
+        if (newsNum != 0 && mode == GET_NEW)
+            recyclerView.smoothScrollToPosition(0);
+        swipeRefreshLayout.setRefreshing(false);
+    }
+
+    // 加载新闻失败，发出通知
+    void onFailure() {
+        getActivity().runOnUiThread(() -> {
+            Toast.makeText(getContext(), "刷新失败", Toast.LENGTH_SHORT).show();
+        });
+        swipeRefreshLayout.setRefreshing(false);
+    }
+
+    //  初始加载新闻失败
+    void initFailure() {
+        getActivity().runOnUiThread(() -> {
+            Toast.makeText(getContext(), "网络连接失败", Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    // 下拉刷新的监听器，重写了recyclerview的两个滑动监听器
+    private class OnLoadMoreListener extends RecyclerView.OnScrollListener {
+        private int lastItem; // 当前最下面完整显示的卡片
 
         @Override
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-            //拖拽或者惯性滑动时isScolled设置为true
-            if (newState == SCROLL_STATE_DRAGGING || newState == SCROLL_STATE_SETTLING) {
-                isScolled = true;
-            } else { isScolled = false; }
+            super.onScrollStateChanged(recyclerView, newState);
+            // 如果滑动到最后一张卡片，并且没有在加载，则申请加载新闻
+            if (newState == RecyclerView.SCROLL_STATE_IDLE && lastItem == mAdapter.getItemCount() - 1
+                && !mPresenter.isLoading()) {
+                mAdapter.setFooterVisibility(true);
+                recyclerView.smoothScrollToPosition(mAdapter.getItemCount());
+                mPresenter.getMoreNews();
+            }
         }
 
         @Override
         public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-            layoutManager = recyclerView.getLayoutManager();
-            countItem = layoutManager.getItemCount();
-            lastItem = ((LinearLayoutManager) layoutManager).findLastCompletelyVisibleItemPosition();
-            if (isScolled && countItem != lastItem && lastItem == countItem - 1) {
-                onLoading(countItem, lastItem);
-            }
+            super.onScrolled(recyclerView, dx, dy);
+            lastItem = layoutManager.findLastCompletelyVisibleItemPosition();
         }
     }
 
@@ -222,5 +191,4 @@ public class NewsListFragment extends Fragment {
             MILLISECONDS_PER_INCH = context.getResources().getDisplayMetrics().density * 0.03f;
         }
     }
-
 }

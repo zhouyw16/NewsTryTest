@@ -1,5 +1,7 @@
 package com.java.chtzyw.data;
 
+import android.util.Log;
+
 import java.util.List;
 
 public class News {
@@ -141,8 +143,9 @@ public class News {
     public boolean getHasRead(){
         return hasRead;
     }
-    public void setHasRead(){
+    public void setHasRead(boolean hasRead){
         this.hasRead=hasRead;
+        Log.d("newsread", getTitle());
     }
 }
 

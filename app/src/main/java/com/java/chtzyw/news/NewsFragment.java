@@ -1,4 +1,4 @@
-package com.java.chtzyw.main;
+package com.java.chtzyw.news;
 
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -23,7 +23,6 @@ public class NewsFragment extends Fragment {
 
     private TabLayout tabLayout;
     private List<Category> categories = Category.getDefaultCategoryList();
-//    private String keyWord = "";
     private ViewPager viewPager;
     private MyPageAdapter pageAdapter;
 
@@ -44,7 +43,6 @@ public class NewsFragment extends Fragment {
         View view = inflater.inflate(R.layout.news_page, container, false);
         tabLayout = view.findViewById(R.id.tab_layout);
         viewPager = view.findViewById(R.id.view_pager);
-
         return view;
     }
 
@@ -53,18 +51,12 @@ public class NewsFragment extends Fragment {
         super.onResume();
         // 设置缓存的页面数量，前后各3个
         viewPager.setOffscreenPageLimit(3);
-
         for (int i = 0; i < categories.size(); i++)
             tabLayout.addTab(tabLayout.newTab());
 
         viewPager.setAdapter(pageAdapter);
         tabLayout.setupWithViewPager(viewPager);
     }
-
-    //    public void setKeyword(String keyWord) {
-//        this.keyWord = keyWord;
-//        pageAdapter.notifyDataSetChanged();
-//    }
 
     private class MyPageAdapter extends FragmentStatePagerAdapter {
         private List<Category> categories;
@@ -82,15 +74,7 @@ public class NewsFragment extends Fragment {
         @Override
         public Fragment getItem(int position) {
             Category cat = categories.get(position);
-            return NewsListFragment.newInstance(cat.idx, cat.title);
-        }
-
-        @NonNull
-        @Override
-        public Object instantiateItem(@NonNull ViewGroup container, int position) {
-            NewsListFragment f = (NewsListFragment) super.instantiateItem(container, position);
-//            f.setKeyWord(keyWord);
-            return f;
+            return NewsListFragment.newInstance(cat.idx);
         }
 
         @Override
