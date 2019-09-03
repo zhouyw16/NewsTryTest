@@ -1,6 +1,8 @@
 package com.java.chtzyw.main;
 
 
+import android.content.Context;
+import android.graphics.PointF;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -8,16 +10,22 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.os.Handler;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.java.chtzyw.R;
+import com.java.chtzyw.data.News;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class NewsListFragment extends Fragment {
 
@@ -73,12 +81,20 @@ public class NewsListFragment extends Fragment {
                         Toast.makeText(getActivity(), "假装刷新了一条数据", Toast.LENGTH_SHORT).show();
                         // 加载完数据设置为不刷新状态，将下拉进度收起来
                         swipeRefreshLayout.setRefreshing(false);
+                        List<News> list = new ArrayList<>();
+                        for (int i = 0; i < 15; i++) {
+                            News news = new News();
+                            news.setTitle("add news" + i);
+                            list.add(news);
+                        }
+                        mAdapter.appendNewsList(list);
+                        recyclerView.smoothScrollToPosition(0);
                 }, 1200);
         });
 
         recyclerView = view.findViewById(R.id.recycler_view);
 
-        layoutManager = new LinearLayoutManager(getContext());
+        layoutManager = new ScrollSpeedLinearLayoutManger(getContext());
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -99,4 +115,65 @@ public class NewsListFragment extends Fragment {
         });
         return view;
     }
+
+
+
+    // 设置自动滑动速度的类，重写了LinearLayoutManger中的几个方法
+    private class ScrollSpeedLinearLayoutManger extends LinearLayoutManager {
+        private float MILLISECONDS_PER_INCH = 0.03f;
+        private Context context;
+
+        ScrollSpeedLinearLayoutManger(Context context) {
+            super(context);
+            this.context = context;
+            setSpeedSlow();
+        }
+
+        @Override
+        public void smoothScrollToPosition(RecyclerView recyclerView,RecyclerView.State state, int position) {
+            LinearSmoothScroller linearSmoothScroller =
+                    new LinearSmoothScroller(recyclerView.getContext()) {
+                        @Override
+                        public PointF computeScrollVectorForPosition(int targetPosition) {
+                            return ScrollSpeedLinearLayoutManger.this
+                                    .computeScrollVectorForPosition(targetPosition);
+                        }
+
+                        //This returns the milliseconds it takes to
+                        //scroll one pixel.
+                        @Override
+                        protected float calculateSpeedPerPixel
+                        (DisplayMetrics displayMetrics) {
+                            return MILLISECONDS_PER_INCH / displayMetrics.density;
+                            //返回滑动一个pixel需要多少毫秒
+                        }
+
+                        @Override
+                        public int calculateDtToFit(int viewStart, int viewEnd, int boxStart, int boxEnd, int snapPreference) {
+                            return boxStart-viewStart;
+                        }
+                    };
+            linearSmoothScroller.setTargetPosition(position);
+            startSmoothScroll(linearSmoothScroller);
+        }
+
+        @Override
+        public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
+            try {
+                super.onLayoutChildren(recycler, state);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        public void setSpeedSlow() {
+            //自己在这里用density去乘，希望不同分辨率设备上滑动速度相同
+            //0.3f是自己估摸的一个值，可以根据不同需求自己修改
+            MILLISECONDS_PER_INCH = context.getResources().getDisplayMetrics().density * 0.3f;
+        }
+
+        public void setSpeedFast() {
+            MILLISECONDS_PER_INCH = context.getResources().getDisplayMetrics().density * 0.03f;
+        }
+    }
+
 }

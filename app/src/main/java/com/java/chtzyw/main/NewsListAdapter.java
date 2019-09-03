@@ -2,7 +2,6 @@ package com.java.chtzyw.main;
 
 import android.content.Context;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -14,8 +13,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.RequestOptions;
 import com.jakewharton.rxbinding2.view.RxView;
 import com.java.chtzyw.R;
 import com.java.chtzyw.data.ImageOption;
@@ -36,19 +33,26 @@ class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         super();
         currContext = context;
         for (int i = 0; i < NUM; i++) {
-            newsList.add(new News());
+            News news = new News();
+            news.setTitle("demo"+i);
+            newsList.add(news);
+
         }
     }
 
-    // 弹出长按删除的菜单
+    // 长按弹出的菜单
     public void showPopMenu(View view,final int pos){
         PopupMenu popupMenu = new PopupMenu(currContext,view);
         popupMenu.getMenuInflater().inflate(R.menu.longclick_news, popupMenu.getMenu());
         popupMenu.setOnMenuItemClickListener((item) -> {
-                removeItem(pos); return false;
-        });
-        popupMenu.setOnDismissListener((menu) -> {
-                Toast.makeText(currContext, "关闭PopupMenu", Toast.LENGTH_SHORT).show();
+                if (item.getItemId() == R.id.remove_news) {
+                    removeItem(pos);
+                    Toast.makeText(currContext, "已屏蔽本条新闻", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    Toast.makeText(currContext, "已收藏本条新闻", Toast.LENGTH_SHORT).show();
+                }
+                return true;
         });
         popupMenu.show();
     }
@@ -60,9 +64,14 @@ class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     public void appendNewsList(List<News> list) {
-        int pos = newsList.size();
-        newsList.addAll(list);
-        this.notifyItemRangeChanged(pos, newsList.size());
+        int len = list.size();
+//        int pos = newsList.size();
+        list.addAll(newsList);
+        newsList = list;
+//        newsList.addAll(list);
+//        this.notifyItemRangeChanged(pos, newsList.size());
+//        this.notifyDataSetChanged();
+        this.notifyItemRangeInserted(0, len);
     }
 
     public void setOnItemClickListener(OnItemClickListener listener) {
@@ -80,7 +89,7 @@ class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int pos) {
         News news =  newsList.get(pos);
         ItemViewHolder item = (ItemViewHolder) holder;
-//        item.mTitle.setText(news.getTitle());
+        item.mTitle.setText(news.getTitle());
 //        item.mAuthor.setText(news.getPublisher());
 //        item.mDate.setText(news.getPublishTime());
 //        item.setImage(news.getImage());
@@ -110,6 +119,7 @@ class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             mDate = view.findViewById(R.id.text_date);
             mImage = view.findViewById(R.id.image_view);
             test_glide();
+
             RxView.clicks(view).throttleFirst(500, TimeUnit.MILLISECONDS)
                     .subscribe((dummy) -> {
                         if (itemClickListener != null) {
@@ -132,6 +142,8 @@ class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             String url = "http://5b0988e595225.cdn.sohucs.com/images/20190830/4926e098335446058eb45e43194d8fc4.png";
             Glide.with(mView).load(url).apply(ImageOption.miniImgOption()).into(mImage);
         }
+
+
 
         @Override
         public void onClick(View view) {
