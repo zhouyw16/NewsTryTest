@@ -115,6 +115,7 @@ public class NewsHandler {
                         clearContent(news);
                         clearImage(news);
                         allNewsList.get(categoryId).addFirst(news);
+                        newsHash.add(news.getNewsID());
                     }
                 }
                 int nowSize=allNewsList.get(categoryId).size();
@@ -150,6 +151,7 @@ public class NewsHandler {
                         clearContent(news);
                         clearImage(news);
                         allNewsList.get(categoryId).addLast(news);
+                        newsHash.add(news.getNewsID());
                     }
                 }
                 int nowSize=allNewsList.get(categoryId).size();
@@ -165,6 +167,11 @@ public class NewsHandler {
         Gson gson=new Gson();
         String jsonData=gson.toJson(news);
         fileSave(file,jsonData);
+    }
+
+    /*删除新闻请求*/
+    public void sendNewsDeleteRequest(LinkedList<News> newsList,int position){
+        newsList.remove(position);
     }
 
     /*保存收藏请求*/
