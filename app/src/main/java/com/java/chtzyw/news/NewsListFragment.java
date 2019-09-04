@@ -53,7 +53,7 @@ public class NewsListFragment extends Fragment {
         }
         mAdapter = new NewsListAdapter(getContext(), category);
         mPresenter = new NewsListPresenter(this, mAdapter, category);
-        mAdapter.setOnItemClickListener((news)->mPresenter.openNewsDetail(news));
+        mAdapter.setOnItemClickListener((news)->mPresenter.openNewsDetail(getContext(),news));
 
         // 如果本地没有缓存，则初始先加载一批新闻
         if (mAdapter.getItemCount() == 0)

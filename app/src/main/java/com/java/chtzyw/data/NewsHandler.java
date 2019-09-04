@@ -8,12 +8,8 @@ import com.java.chtzyw.MainApplication;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -22,10 +18,10 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.util.Random;
 
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
@@ -40,10 +36,11 @@ public class NewsHandler {
         return handler;
     }
     private NewsHandler(){
-        Log.d("MainActivity", "Construct");
         mContext= MainApplication.getContextObject();
         favorList=new LinkedList<>();
-        newsHash=new HashSet<>();
+        tagNewsHash=new HashSet<>();
+        allNewsHash=new HashSet<>();
+        recNewsHash=new HashSet<>();
         pageList=new ArrayList<>();
         for(int i=0;i<12;i++)
             pageList.add(1);
@@ -55,8 +52,6 @@ public class NewsHandler {
      * */
     private void initAllNewsList(){
         /*获取本地文件目录*/
-        if(mContext==null)
-            Log.d("MainActivity", "initAllNewsList: mContext=null");
         File path=mContext.getDir("news",Context.MODE_PRIVATE);
         File[] files=path.listFiles();
         /*创建分类链表*/
@@ -71,15 +66,20 @@ public class NewsHandler {
         for(int i=0;i<loadNum;i++){
             News news=gson.fromJson(fileLoad(files[i]),News.class);
             allNewsList.get(0).addLast(news);
+            allNewsList.get(1).addLast(news);
             allNewsList.get(Category.getCategoryId(news.getCategory())).addLast(news);
-            newsHash.add(news.getNewsID());
+            allNewsHash.add(news.getNewsID());
+            tagNewsHash.add(news.getNewsID());
+            recNewsHash.add(news.getNewsID());
         }
     }
 
     private Context mContext;                   //文本内容，用于文件读写
     private List<LinkedList<News>> allNewsList; //各分类列表
     private LinkedList<News> favorList;         //收藏列表
-    private HashSet<String> newsHash;           //新闻Id哈希表，用于判重
+    private HashSet<String> tagNewsHash;        //分类新闻Id哈希表，用于判重
+    private HashSet<String> allNewsHash;        //综合新闻Id哈希表
+    private HashSet<String> recNewsHash;        //推荐新闻Id哈希表
     private List<Integer> pageList;             //类别页数
     private final int LOCAL_LOAD_MAX=200;       //本地新闻加载上限
 
@@ -94,11 +94,23 @@ public class NewsHandler {
 
     /*各分类下拉刷新*/
     public void sendRefreshRequest(int categoryId,int needNum,ResultListener resultListener){
-        HttpClient httpClient=new HttpClient.Builder()
-                .setSize(needNum)
-                .setCategories(categoryId)
-                .build();
-        Log.d("MainActivity", "onClick: "+httpClient.getNewsUrl());
+
+        HttpClient httpClient;
+        /*推荐页单独处理*/
+        if(categoryId==1){
+            Random rand=new Random();
+            int searchId=rand.nextInt(10)+2;
+            httpClient=new HttpClient.Builder()
+                    .setSize(needNum)
+                    .setCategories(searchId)
+                    .build();
+        }
+        else{
+            httpClient=new HttpClient.Builder()
+                    .setSize(needNum)
+                    .setCategories(categoryId)
+                    .build();
+        }
         Request request=new Request.Builder().url(httpClient.getNewsUrl()).build();
         httpClient.getOkHttpClient().newCall(request).enqueue(new Callback() {
             @Override
@@ -112,11 +124,23 @@ public class NewsHandler {
                 Gson gson=new Gson();
                 NewsJson newsJson=gson.fromJson(jsonData,NewsJson.class);
                 for(News news:newsJson.getData()){
-                    if(!newsHash.contains(news.getNewsID())){
+                    if(categoryId==0&&!allNewsHash.contains(news.getNewsID())){
                         clearContent(news);
                         clearImage(news);
                         allNewsList.get(categoryId).addFirst(news);
-                        newsHash.add(news.getNewsID());
+                        allNewsHash.add(news.getNewsID());
+                    }
+                    else if(categoryId==1&&!recNewsHash.contains(news.getNewsID())){
+                        clearContent(news);
+                        clearImage(news);
+                        allNewsList.get(categoryId).addFirst(news);
+                        recNewsHash.add(news.getNewsID());
+                    }
+                    else if(categoryId>1&&!tagNewsHash.contains(news.getNewsID())){
+                        clearContent(news);
+                        clearImage(news);
+                        allNewsList.get(categoryId).addFirst(news);
+                        tagNewsHash.add(news.getNewsID());
                     }
                 }
                 int nowSize=allNewsList.get(categoryId).size();
@@ -127,14 +151,25 @@ public class NewsHandler {
 
     /*各分类上拉加载*/
     public void sendLoadRequest(int categoryId,int needNum,ResultListener resultListener){
-
         pageList.set(categoryId,pageList.get(categoryId)+1);
-        HttpClient httpClient=new HttpClient.Builder()
-                .setSize(needNum)
-                .setCategories(categoryId)
-                .setPage(pageList.get(categoryId))
-                .build();
-        Log.d("MainActivity", "onClick: "+httpClient.getNewsUrl());
+        HttpClient httpClient;
+        /*推荐页单独处理*/
+        if(categoryId==1){
+            Random rand=new Random();
+            int searchId=rand.nextInt(10)+2;
+            httpClient=new HttpClient.Builder()
+                    .setSize(needNum)
+                    .setCategories(searchId)
+                    .setPage(pageList.get(categoryId))
+                    .build();
+        }
+        else{
+            httpClient=new HttpClient.Builder()
+                    .setSize(needNum)
+                    .setCategories(categoryId)
+                    .setPage(pageList.get(categoryId))
+                    .build();
+        }
         Request request=new Request.Builder().url(httpClient.getNewsUrl()).build();
         httpClient.getOkHttpClient().newCall(request).enqueue(new Callback() {
             @Override
@@ -148,11 +183,24 @@ public class NewsHandler {
                 Gson gson=new Gson();
                 NewsJson newsJson=gson.fromJson(jsonData,NewsJson.class);
                 for(News news:newsJson.getData()){
-                    if(!newsHash.contains(news.getNewsID())){
+                    if(categoryId==0&&!allNewsHash.contains(news.getNewsID())){
                         clearContent(news);
                         clearImage(news);
                         allNewsList.get(categoryId).addLast(news);
-                        newsHash.add(news.getNewsID());
+                        allNewsHash.add(news.getNewsID());
+                    }
+                    else if(categoryId==1&&!recNewsHash.contains(news.getNewsID()))
+                    {
+                        clearContent(news);
+                        clearImage(news);
+                        allNewsList.get(categoryId).addLast(news);
+                        recNewsHash.add(news.getNewsID());
+                    }
+                    else if(categoryId>1&&!tagNewsHash.contains(news.getNewsID())){
+                        clearContent(news);
+                        clearImage(news);
+                        allNewsList.get(categoryId).addLast(news);
+                        tagNewsHash.add(news.getNewsID());
                     }
                 }
                 int nowSize=allNewsList.get(categoryId).size();
