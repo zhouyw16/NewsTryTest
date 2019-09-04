@@ -20,6 +20,7 @@ import com.java.chtzyw.R;
 import com.java.chtzyw.data.ImageOption;
 import com.java.chtzyw.data.News;
 import com.java.chtzyw.data.NewsHandler;
+import com.java.chtzyw.data.TagManager;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -63,10 +64,13 @@ class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         popupMenu.setOnMenuItemClickListener((item) -> {
                 if (item.getItemId() == R.id.remove_news) {
                     removeItem(pos);
-                    Toast.makeText(currContext, "已屏蔽本条新闻", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(currContext, "将减少此类新闻推荐", Toast.LENGTH_SHORT).show();
+                    TagManager.getI().dislike(getNews(pos).getCategory());
                 }
                 else {
                     Toast.makeText(currContext, "已收藏本条新闻", Toast.LENGTH_SHORT).show();
+                    TagManager.getI().favour(getNews(pos).getCategory());
+                    // 记录收藏新闻
                 }
                 return true;
         });

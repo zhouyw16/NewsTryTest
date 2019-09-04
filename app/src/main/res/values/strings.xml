@@ -15,8 +15,9 @@
     <string name="menu_share">Share</string>
     <string name="menu_send">Send</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="clear_cache_button_text">清除本地缓存新闻及图片</string>
+    <string name="tag_setting_list_text">点击添加或删除新闻分类：</string>
+
     <string name="title_activity_news_detail">NewsDetailActivity</string>
 
 </resources>
