@@ -21,6 +21,8 @@ import android.widget.Toast;
 import com.java.chtzyw.R;
 import com.java.chtzyw.data.*;
 
+import cn.sharesdk.onekeyshare.OnekeyShare;
+
 public class NewsDetailActivity extends AppCompatActivity {
 
     private News news;
@@ -77,10 +79,20 @@ public class NewsDetailActivity extends AppCompatActivity {
             return true;
         }
         else if(id==R.id.action_share){
-            Intent intent=new Intent(Intent.ACTION_SEND);
-            intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_TEXT,news.getTitle()+"\t"+news.getPublisher());
-            startActivity(Intent.createChooser(intent,news.getTitle()));
+            OnekeyShare oks = new OnekeyShare();
+            // title标题，微信、QQ和QQ空间等平台使用
+            oks.setTitle(news.getTitle());
+            // titleUrl QQ和QQ空间跳转链接
+            oks.setTitleUrl("http://sharesdk.cn");
+            // text是分享文本，所有平台都需要这个字段
+            oks.setText("我是分享文本");
+            // imagePath是图片的本地路径，确保SDcard下面存在此张图片
+            oks.setImagePath("/sdcard/test.jpg");
+//            oks.setImagePath("/sdcard/NewsAppPicture/1.png");
+            // url在微信、Facebook等平台中使用
+            oks.setUrl("http://sharesdk.cn");
+            // 启动分享GUI
+            oks.show(this);
         }
         return true;
     }
