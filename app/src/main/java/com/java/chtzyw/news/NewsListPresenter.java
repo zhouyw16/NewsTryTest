@@ -1,5 +1,8 @@
 package com.java.chtzyw.news;
 
+import android.content.Context;
+import android.content.Intent;
+
 import com.java.chtzyw.data.News;
 import com.java.chtzyw.data.NewsHandler;
 import com.java.chtzyw.data.ResultListener;
@@ -93,7 +96,9 @@ public class NewsListPresenter {
 
     }
 
-    public void openNewsDetail(News news) {
-
+    public void openNewsDetail(Context context, News news) {
+        Intent intent=new Intent(context,NewsDetailActivity.class);
+        intent.putExtra("news_detail",news);
+        context.startActivity(intent);
     }
 }

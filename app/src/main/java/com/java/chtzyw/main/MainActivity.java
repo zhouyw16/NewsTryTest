@@ -81,10 +81,10 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            Toast.makeText(this, "你点击了右上角的菜单！\n但是现在还没有实现功能！",
-                    Toast.LENGTH_LONG).show();
-        }
+//        if (id == R.id.action_settings) {
+//            Toast.makeText(this, "你点击了右上角的菜单！\n但是现在还没有实现功能！",
+//                    Toast.LENGTH_LONG).show();
+//        }
 
         return super.onOptionsItemSelected(item);
     }
