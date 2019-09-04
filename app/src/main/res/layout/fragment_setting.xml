@@ -2,12 +2,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.java.chtzyw.main.SettingFragment">
+    tools:context="com.java.chtzyw.setting.SettingFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="setting fragment!" />
+        android:orientation="vertical">
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/clear_cache_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        </androidx.cardview.widget.CardView>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/tag_setting_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
 
 </FrameLayout>

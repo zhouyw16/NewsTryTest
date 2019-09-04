@@ -1,11 +1,5 @@
 package com.java.chtzyw.news;
 
-import android.util.Log;
-import android.view.View;
-import android.widget.Toast;
-
-import androidx.fragment.app.Fragment;
-
 import com.java.chtzyw.data.News;
 import com.java.chtzyw.data.NewsHandler;
 import com.java.chtzyw.data.ResultListener;
@@ -15,15 +9,15 @@ import java.util.LinkedList;
 public class NewsListPresenter {
     private final static int NEWS_NUM = 15;
 
-    private int category;
+    private int tagId;
     private boolean loading = false;
 
     private NewsListAdapter adapter;
     private NewsListFragment fragment;
 
-    public NewsListPresenter(NewsListFragment fragment, NewsListAdapter adapter, int category) {
+    public NewsListPresenter(NewsListFragment fragment, NewsListAdapter adapter, int tagId) {
         this.adapter = adapter;
-        this.category = category;
+        this.tagId = tagId;
         this.fragment = fragment;
     }
 
@@ -34,7 +28,7 @@ public class NewsListPresenter {
     // 初始化可能会用的回调接口
     public void firstGet() {
         loading = true;
-        NewsHandler.getHandler().sendRefreshRequest(category, NEWS_NUM, new ResultListener() {
+        NewsHandler.getHandler().sendRefreshRequest(tagId, NEWS_NUM, new ResultListener() {
             @Override
             public void onSuccess(LinkedList<News> newsList, int newsNum) {
                 loading = false;
@@ -55,7 +49,7 @@ public class NewsListPresenter {
     // 加载更多新闻，设置回调函数
     public void getMoreNews() {
         loading = true;
-        NewsHandler.getHandler().sendLoadRequest(category, NEWS_NUM, new ResultListener() {
+        NewsHandler.getHandler().sendLoadRequest(tagId, NEWS_NUM, new ResultListener() {
             @Override
             public void onSuccess(LinkedList<News> newsList, int newsNum) {
                 loading = false;
@@ -79,7 +73,7 @@ public class NewsListPresenter {
     // 获取最新新闻，设置回调函数
     public void getLatestNews() {
         loading = true;
-        NewsHandler.getHandler().sendRefreshRequest(category, NEWS_NUM, new ResultListener() {
+        NewsHandler.getHandler().sendRefreshRequest(tagId, NEWS_NUM, new ResultListener() {
             @Override
             public void onSuccess(LinkedList<News> newsList, int newsNum) {
                 loading = false;

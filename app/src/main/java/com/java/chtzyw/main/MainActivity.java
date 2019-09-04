@@ -14,7 +14,9 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.navigation.NavigationView;
 import com.java.chtzyw.R;
+import com.java.chtzyw.favourite.FavouriteFragment;
 import com.java.chtzyw.news.NewsFragment;
+import com.java.chtzyw.setting.SettingFragment;
 
 // 主活动，管理导航栏和工具栏的响应事件
 public class MainActivity extends AppCompatActivity
@@ -132,7 +134,7 @@ public class MainActivity extends AppCompatActivity
     private void switchToFavourite() {
         switchTo(R.id.nav_favourite, "收藏");
         if (mFavourite == null)
-            mFavourite = FavouriteFragment.newInstance("favourite", "demo");
+            mFavourite = FavouriteFragment.newInstance();
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.frame_content, mFavourite).commit();
     }

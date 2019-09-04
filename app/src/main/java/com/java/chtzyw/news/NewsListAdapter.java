@@ -34,10 +34,10 @@ class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private List<News> newsList;
     private boolean showFooter;
 
-    public NewsListAdapter(Context context, int category) {
+    public NewsListAdapter(Context context, int tagId) {
         super();
         currContext = context;
-        newsList = NewsHandler.getHandler().sendInitNewsList(category);
+        newsList = NewsHandler.getHandler().sendInitNewsList(tagId);
     }
 
     public void setNewsList(List<News> newsList) {

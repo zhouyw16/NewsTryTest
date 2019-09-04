@@ -1,10 +1,9 @@
 package com.java.chtzyw.data;
 
-import android.util.Log;
-
+import java.io.Serializable;
 import java.util.List;
 
-public class News {
+public class News implements Serializable {
     private String image;
     private String publishTime;
     private List<Keywords> keywords;
@@ -145,16 +144,15 @@ public class News {
     }
     public void setHasRead(boolean hasRead){
         this.hasRead=hasRead;
-        Log.d("newsread", getTitle());
     }
 }
 
-class Keywords{
+class Keywords implements Serializable{
     private String score;
     private String word;
 }
 
-class When{
+class When implements Serializable{
     private String score;
     private String word;
     public String getScore(){
@@ -171,19 +169,19 @@ class When{
     }
 }
 
-class Persons{
+class Persons implements Serializable{
     private String count;
     private String linkedURL;
     private String mention;
 }
 
-class Organizations{
+class Organizations implements Serializable{
     private String count;
     private String linkedURL;
     private String mention;
 }
 
-class Locations{
+class Locations implements Serializable{
     private String lng;
     private String count;
     private String linkedURL;
@@ -191,12 +189,12 @@ class Locations{
     private String mention;
 }
 
-class Where{
+class Where implements Serializable{
     private String score;
     private String word;
 }
 
-class Who {
+class Who implements Serializable{
     private String score;
     private String word;
 }

@@ -75,7 +75,7 @@ public class HttpClient {
         }
         public Builder setCategories(int categories){
             if(categories>1)
-                this.categories="categories="+Category.DEFAULT_CATEGORIES[categories]+"&";
+                this.categories="categories="+TagManager.DEFAULT_TAGLIST[categories]+"&";
             return this;
         }
         public Builder setPage(int page){

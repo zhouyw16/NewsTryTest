@@ -11,6 +11,12 @@
     <color name="colorTabSelectedText">#31d7d7</color>
     <color name="colorTabText">#CCCCCC</color>
 
+    <color name="colorTagSelectedText">#31d7d7</color>
+    <color name="colorTagSelectedBg">#242333</color>
+    <color name="colorTagText">#272636</color>
+    <color name="colorTagBg">#FFFFFF</color>
+
+
     <color name="colorCard">#2e3045</color>
     <color name="colorCardRead">#272636</color>
     <color name="colorSelectorNormal">#FFFFFFFF</color>

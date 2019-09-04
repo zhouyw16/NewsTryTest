@@ -24,7 +24,7 @@ public class NewsListFragment extends Fragment {
 
     public  static final int GET_NEW = 1;  // 上拉刷新
     public  static final int GET_MORE = 2; // 下拉加载
-    private static final String ARG_CATEGORY = "mCategory";
+    private static final String ARG_TAGID = "mTag";
 
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
@@ -36,10 +36,10 @@ public class NewsListFragment extends Fragment {
 
     public NewsListFragment() {}
 
-    public static NewsListFragment newInstance(int category) {
+    public static NewsListFragment newInstance(int tagId) {
         NewsListFragment fragment = new NewsListFragment();
         Bundle args = new Bundle();
-        args.putInt(ARG_CATEGORY, category);
+        args.putInt(ARG_TAGID, tagId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -47,12 +47,12 @@ public class NewsListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        int category = -1;
+        int tagId = -1;
         if (getArguments() != null) {
-            category = getArguments().getInt(ARG_CATEGORY);
+            tagId = getArguments().getInt(ARG_TAGID);
         }
-        mAdapter = new NewsListAdapter(getContext(), category);
-        mPresenter = new NewsListPresenter(this, mAdapter, category);
+        mAdapter = new NewsListAdapter(getContext(), tagId);
+        mPresenter = new NewsListPresenter(this, mAdapter, tagId);
         mAdapter.setOnItemClickListener((news)->mPresenter.openNewsDetail(news));
 
         // 如果本地没有缓存，则初始先加载一批新闻
@@ -72,7 +72,7 @@ public class NewsListFragment extends Fragment {
         swipeRefreshLayout.setOnRefreshListener(() -> mPresenter.getLatestNews());
 
         // 配置recyclerview的样式
-        recyclerView = view.findViewById(R.id.recycler_view);
+        recyclerView = view.findViewById(R.id.news_list_view);
         layoutManager = new ScrollSpeedLinearLayoutManger(getContext());
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);

@@ -9,5 +9,6 @@ public class ImageOption {
             .placeholder(R.drawable.sample_pic)
             .diskCacheStrategy(DiskCacheStrategy.NONE)
             .override(320, 180);
+
     public static RequestOptions miniImgOption() {return miniOption;}
 }
