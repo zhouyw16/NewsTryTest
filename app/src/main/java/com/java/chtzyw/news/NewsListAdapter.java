@@ -1,6 +1,8 @@
-package com.java.chtzyw.main;
+package com.java.chtzyw.news;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,7 +12,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.core.widget.ContentLoadingProgressBar;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -18,8 +19,8 @@ import com.jakewharton.rxbinding2.view.RxView;
 import com.java.chtzyw.R;
 import com.java.chtzyw.data.ImageOption;
 import com.java.chtzyw.data.News;
+import com.java.chtzyw.data.NewsHandler;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -30,22 +31,33 @@ class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private OnItemClickListener itemClickListener;
     private Context currContext;
-    private List<News> newsList = new ArrayList<>();
-    private int NUM = 20;
+    private List<News> newsList;
+    private boolean showFooter;
 
-    public NewsListAdapter(Context context) {
+    public NewsListAdapter(Context context, int category) {
         super();
         currContext = context;
-        for (int i = 0; i < NUM; i++) {
-            News news = new News();
-            news.setTitle("demo"+i);
-            newsList.add(news);
+        newsList = NewsHandler.getHandler().sendInitNewsList(category);
+    }
 
+    public void setNewsList(List<News> newsList) {
+        this.newsList = newsList;
+    }
+
+    public News getNews(int pos) {
+        return newsList.get(pos);
+    }
+
+    public void setFooterVisibility(boolean visible) {
+        if (showFooter != visible) {
+            showFooter = visible;
+            if (visible) notifyItemInserted(newsList.size());
+            else notifyItemRemoved(newsList.size());
         }
     }
 
     // 长按弹出的菜单
-    public void showPopMenu(View view,final int pos){
+    public void showPopMenu(View view,final int pos) {
         PopupMenu popupMenu = new PopupMenu(currContext,view);
         popupMenu.getMenuInflater().inflate(R.menu.longclick_news, popupMenu.getMenu());
         popupMenu.setOnMenuItemClickListener((item) -> {
@@ -69,26 +81,13 @@ class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        if (position==newsList.size()) {
+        if (position==newsList.size() && showFooter) {
             return TYPE_FOOTER;
         }
         return TYPE_CONTENT;
     }
 
-    public void getMoreNews(List<News> list) {
-        int num = list.size();
-        int pos = newsList.size();
-        newsList.addAll(list);
-        this.notifyItemRangeInserted(pos, num);
-    }
-
-    public void getLatestNews(List<News> list) {
-        int num = list.size();
-        list.addAll(newsList);
-        newsList = list;
-        this.notifyItemRangeInserted(0, num);
-    }
-
+    // 设置卡片点击的回调函数
     public void setOnItemClickListener(OnItemClickListener listener) {
         itemClickListener = listener;
     }
@@ -111,79 +110,69 @@ class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int pos) {
         if (getItemViewType(pos) == TYPE_FOOTER) return;
-
+        // 设置view的内容
         News news =  newsList.get(pos);
         ItemViewHolder item = (ItemViewHolder) holder;
         item.mTitle.setText(news.getTitle());
-//        item.mAuthor.setText(news.getPublisher());
-//        item.mDate.setText(news.getPublishTime());
-//        item.setImage(news.getImage());
-
+        item.mAuthor.setText(news.getPublisher());
+        item.mDate.setText(news.getPublishTime());
+        item.setImage(news.getCover());
+        int color = news.getHasRead() ? currContext.getColor(R.color.colorDetail)
+                                      : currContext.getColor(R.color.colorTitle);
+        item.mTitle.setTextColor(color);
     }
 
     @Override
     public int getItemCount() {
-        return newsList.size() + 1;
+        return newsList.size() + (showFooter ? 1 : 0);
     }
 
+    // 卡片点击的回调接口
     public interface OnItemClickListener {
-        void onItemClick(View view, int position);
+        void onItemClick(News news);
     }
 
-    private class ItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-
+    // 正常卡片的viewholder
+    private class ItemViewHolder extends RecyclerView.ViewHolder {
         View mView;
-        public TextView mTitle, mAuthor, mDate;
-//        int mCurrentPosition = -1;
+        TextView mTitle, mAuthor, mDate;
         ImageView mImage;
-        public ItemViewHolder(View view) {
+        ItemViewHolder(View view) {
             super(view);
             mView = view;
             mTitle = view.findViewById(R.id.text_title);
             mAuthor = view.findViewById(R.id.text_author);
             mDate = view.findViewById(R.id.text_date);
             mImage = view.findViewById(R.id.image_view);
-            test_glide();
 
+            // 绑定点击事件，过滤频繁操作
             RxView.clicks(view).throttleFirst(500, TimeUnit.MILLISECONDS)
                     .subscribe((dummy) -> {
                         if (itemClickListener != null) {
-                            itemClickListener.onItemClick(mView, this.getLayoutPosition());
+                            News news= getNews(getLayoutPosition());
+                            news.setHasRead(true);
+                            mTitle.setTextColor(currContext.getColor(R.color.colorDetail));
+                            itemClickListener.onItemClick(news);
                         }
                     });
+            // 绑定长按事件
             RxView.longClicks(view).subscribe((dummy) -> showPopMenu(mView, this.getLayoutPosition()));
         }
 
-        public void setImage(String url) {
-            if (url == null)
+        void setImage(String url) {
+            if (url == null) {
                 mImage.setVisibility(View.GONE);
+            }
             else {
                 mImage.setVisibility(View.VISIBLE);
                 Glide.with(mView).load(url).apply(ImageOption.miniImgOption()).into(mImage);
             }
         }
 
-        private void test_glide() {
-            String url = "http://5b0988e595225.cdn.sohucs.com/images/20190830/4926e098335446058eb45e43194d8fc4.png";
-            Glide.with(mView).load(url).apply(ImageOption.miniImgOption()).into(mImage);
-        }
-
-
-
-        @Override
-        public void onClick(View view) {
-            if (itemClickListener != null) {
-                itemClickListener.onItemClick(view, this.getLayoutPosition());
-            }
-        }
     }
 
+    // progressbar的viewholder
     private class FooterViewHolder extends RecyclerView.ViewHolder {
-        private ContentLoadingProgressBar progressBar;
-
-        public FooterViewHolder(View view) {
-            super(view);
-            progressBar = view.findViewById(R.id.scrollup_progressbar);
-        }
+        FooterViewHolder(View view) { super(view); }
     }
 }

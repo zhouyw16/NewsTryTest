@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.navigation.NavigationView;
 import com.java.chtzyw.R;
+import com.java.chtzyw.news.NewsFragment;
 
 // 主活动，管理导航栏和工具栏的响应事件
 public class MainActivity extends AppCompatActivity

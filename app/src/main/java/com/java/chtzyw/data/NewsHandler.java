@@ -67,6 +67,7 @@ public class NewsHandler {
         /*缓存本地新闻*/
         Gson gson=new Gson();
         int loadNum=files.length<LOCAL_LOAD_MAX?files.length:LOCAL_LOAD_MAX;
+
         for(int i=0;i<loadNum;i++){
             News news=gson.fromJson(fileLoad(files[i]),News.class);
             allNewsList.get(0).addLast(news);
