@@ -1,8 +1,6 @@
 package com.java.chtzyw.news;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,8 +67,10 @@ class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 }
                 else {
                     Toast.makeText(currContext, "已收藏本条新闻", Toast.LENGTH_SHORT).show();
-                    TagManager.getI().favour(getNews(pos).getCategory());
+                    News news = getNews(pos);
+                    TagManager.getI().favour(news.getCategory());
                     // 记录收藏新闻
+                    NewsHandler.getHandler().sendFavorSaveRequest(getNews(pos));
                 }
                 return true;
         });
@@ -79,7 +79,7 @@ class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     // 删除一个元素
     public void removeItem(int position) {
-        newsList.remove(position);
+        NewsHandler.getHandler().sendNewsDeleteRequest(newsList, position);
         this.notifyItemRemoved(position);
     }
 
@@ -89,11 +89,6 @@ class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             return TYPE_FOOTER;
         }
         return TYPE_CONTENT;
-    }
-
-    // 设置卡片点击的回调函数
-    public void setOnItemClickListener(OnItemClickListener listener) {
-        itemClickListener = listener;
     }
 
     @NonNull
@@ -129,6 +124,11 @@ class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public int getItemCount() {
         return newsList.size() + (showFooter ? 1 : 0);
+    }
+
+    // 设置卡片点击的回调函数
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        itemClickListener = listener;
     }
 
     // 卡片点击的回调接口

@@ -218,7 +218,7 @@ public class NewsHandler {
     }
 
     /*删除新闻请求*/
-    public void sendNewsDeleteRequest(LinkedList<News> newsList,int position){
+    public void sendNewsDeleteRequest(List<News> newsList,int position){
         newsList.remove(position);
     }
 

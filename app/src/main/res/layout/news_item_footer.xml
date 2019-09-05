@@ -5,7 +5,7 @@
 
     <androidx.core.widget.ContentLoadingProgressBar
         android:id="@+id/scrollup_progressbar"
-        style="?android:attr/progressBarStyle"
+        style="?android:attr/progressBarStyleSmall"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

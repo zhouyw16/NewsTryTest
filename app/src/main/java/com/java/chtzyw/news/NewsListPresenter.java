@@ -6,10 +6,11 @@ import android.content.Intent;
 import com.java.chtzyw.data.News;
 import com.java.chtzyw.data.NewsHandler;
 import com.java.chtzyw.data.ResultListener;
+import com.java.chtzyw.data.TagManager;
 
 import java.util.LinkedList;
 
-public class NewsListPresenter {
+class NewsListPresenter {
     private final static int NEWS_NUM = 15;
 
     private int tagId;
@@ -18,18 +19,18 @@ public class NewsListPresenter {
     private NewsListAdapter adapter;
     private NewsListFragment fragment;
 
-    public NewsListPresenter(NewsListFragment fragment, NewsListAdapter adapter, int tagId) {
+    NewsListPresenter(NewsListFragment fragment, NewsListAdapter adapter, int tagId) {
         this.adapter = adapter;
         this.tagId = tagId;
         this.fragment = fragment;
     }
 
-    public boolean isLoading() {
+    boolean isLoading() {
         return loading;
     }
 
     // 初始化可能会用的回调接口
-    public void firstGet() {
+    void firstGet() {
         loading = true;
         NewsHandler.getHandler().sendRefreshRequest(tagId, NEWS_NUM, new ResultListener() {
             @Override
@@ -50,7 +51,7 @@ public class NewsListPresenter {
     }
 
     // 加载更多新闻，设置回调函数
-    public void getMoreNews() {
+    void getMoreNews() {
         loading = true;
         NewsHandler.getHandler().sendLoadRequest(tagId, NEWS_NUM, new ResultListener() {
             @Override
@@ -74,7 +75,7 @@ public class NewsListPresenter {
     }
 
     // 获取最新新闻，设置回调函数
-    public void getLatestNews() {
+    void getLatestNews() {
         loading = true;
         NewsHandler.getHandler().sendRefreshRequest(tagId, NEWS_NUM, new ResultListener() {
             @Override
@@ -96,7 +97,10 @@ public class NewsListPresenter {
 
     }
 
-    public void openNewsDetail(Context context, News news) {
+    void openNewsDetail(Context context, News news) {
+        // 增加当前点击分类的权重
+        TagManager.getI().looked(news.getCategory());
+        NewsHandler.getHandler().sendNewsSaveRequest(news);
         Intent intent=new Intent(context,NewsDetailActivity.class);
         intent.putExtra("news_detail",news);
         context.startActivity(intent);

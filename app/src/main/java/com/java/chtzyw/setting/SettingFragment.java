@@ -21,18 +21,17 @@ import com.java.chtzyw.data.TagManager;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+// 设置页的fragment
 public class SettingFragment extends Fragment {
-    private RecyclerView recyclerView;
-    private MyAdapter myAdapter;
+    private MyAdapter myAdapter;     // recyclerview的适配器
 
     public SettingFragment() {}
-
     public static SettingFragment newInstance() { return new SettingFragment(); }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        myAdapter = new MyAdapter();
+        myAdapter = new MyAdapter(); // 初始化适配器
     }
 
     @Override
@@ -40,26 +39,24 @@ public class SettingFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_setting, container, false);
-        recyclerView = view.findViewById(R.id.tag_setting_list);
+
+        // 使用recyclerview管理网格布局
+        RecyclerView recyclerView = view.findViewById(R.id.tag_setting_list);
         recyclerView.setAdapter(myAdapter);
         GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 3);
         recyclerView.setLayoutManager(layoutManager);
         return view;
     }
 
-
-    class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    // 自定义的适配器
+    private class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         private final List<TagManager.Tag> tagList;
 
-        public MyAdapter() {
-            super();
-            tagList = TagManager.getI().getSettingTagList();
-        }
+        // 构造函数中初始化标签列表
+        MyAdapter() { super(); tagList = TagManager.getI().getSettingTagList(); }
 
         @Override
-        public int getItemCount() {
-            return tagList.size();
-        }
+        public int getItemCount() { return tagList.size(); }
 
         @NonNull
         @Override
@@ -74,6 +71,7 @@ public class SettingFragment extends Fragment {
             TagManager.Tag tag = tagList.get(position);
             MyViewHolder item = (MyViewHolder) holder;
             item.mText.setText(tag.title);
+            // 设置不同状态的标签样式
             if (tag.isVisible()) {
                 item.mView.setCardBackgroundColor(getContext().getColor(R.color.colorTagSelectedBg));
                 item.mText.setTextColor(getContext().getColor(R.color.colorTagSelectedText));
@@ -85,17 +83,18 @@ public class SettingFragment extends Fragment {
 
         }
 
-        private TagManager.Tag getTag(int pos) {
-            return tagList.get(pos);
-        }
+        // 辅助函数，根据元素位置返回标签，供viewHolder回调
+        private TagManager.Tag getTag(int pos) { return tagList.get(pos); }
 
         class MyViewHolder extends RecyclerView.ViewHolder {
             CardView mView;
             TextView mText;
+
             MyViewHolder(CardView view) {
                 super(view);
                 mView = view;
                 mText =view.findViewById(R.id.tag_setting_card);
+                // 绑定标签点击事件的回调函数
                 RxView.clicks(mView).throttleFirst(500, TimeUnit.MILLISECONDS)
                         .subscribe((dummy) -> {
                             TagManager.Tag tag = getTag(getLayoutPosition());

@@ -2,6 +2,7 @@ package com.java.chtzyw.news;
 
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,12 +47,6 @@ public class NewsFragment extends Fragment {
         View view = inflater.inflate(R.layout.news_page, container, false);
         tabLayout = view.findViewById(R.id.tab_layout);
         viewPager = view.findViewById(R.id.view_pager);
-        return view;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
         // 设置缓存的页面数量，前后各3个
         viewPager.setOffscreenPageLimit(3);
         int num = pageAdapter.getCount();
@@ -60,6 +55,7 @@ public class NewsFragment extends Fragment {
 
         viewPager.setAdapter(pageAdapter);
         tabLayout.setupWithViewPager(viewPager);
+        return view;
     }
 
     private class MyPageAdapter extends FragmentStatePagerAdapter {

@@ -3,7 +3,6 @@ package com.java.chtzyw.main;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,6 +22,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private int currNavigationId = R.id.nav_home;   // 当前导航栏选中页面的id
+//    private int lastNavigationId = R.id.nav_setting;// 上次导航栏选中页面的id
     private Toolbar mToolBar;                       // 工具栏
     private Fragment mNews, mFavourite, mSetting;   // 导航栏的各种不同页面
     private NavigationView mNavigationView;         // 导航栏
@@ -44,12 +44,6 @@ public class MainActivity extends AppCompatActivity
 
         // 设置导航栏切换的回调函数
         mNavigationView.setNavigationItemSelectedListener(this);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // 回到主页面时切换到当前的页面
         switchNavigation(currNavigationId);
     }
 

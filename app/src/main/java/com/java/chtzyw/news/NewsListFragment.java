@@ -114,13 +114,16 @@ public class NewsListFragment extends Fragment {
     // 下拉刷新的监听器，重写了recyclerview的两个滑动监听器
     private class OnLoadMoreListener extends RecyclerView.OnScrollListener {
         private int lastItem; // 当前最下面完整显示的卡片
+        private int lastdy;
 
         @Override
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
             super.onScrollStateChanged(recyclerView, newState);
             // 如果滑动到最后一张卡片，并且没有在加载，则申请加载新闻
-            if (newState == RecyclerView.SCROLL_STATE_IDLE && lastItem == mAdapter.getItemCount() - 1
-                && !mPresenter.isLoading()) {
+            if (newState == RecyclerView.SCROLL_STATE_IDLE
+                    && lastItem == mAdapter.getItemCount() - 1
+                    && !mPresenter.isLoading()
+                    && lastdy > 0) {
                 mAdapter.setFooterVisibility(true);
                 recyclerView.smoothScrollToPosition(mAdapter.getItemCount());
                 mPresenter.getMoreNews();
@@ -130,6 +133,7 @@ public class NewsListFragment extends Fragment {
         @Override
         public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
             super.onScrolled(recyclerView, dx, dy);
+            lastdy = dy;
             lastItem = layoutManager.findLastCompletelyVisibleItemPosition();
         }
     }
