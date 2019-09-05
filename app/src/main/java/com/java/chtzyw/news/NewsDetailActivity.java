@@ -33,6 +33,9 @@ public class NewsDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_news_detail);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         news=(News)getIntent().getSerializableExtra("news_detail");
         TextView textTitle=(TextView)findViewById(R.id.text_title);
@@ -64,7 +67,7 @@ public class NewsDetailActivity extends AppCompatActivity {
     /*显示右上方三点按钮*/
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.detail_toolbar, menu);
         return true;
     }
 
@@ -73,7 +76,11 @@ public class NewsDetailActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.action_favor) {
+        if(id==android.R.id.home){
+            finish();
+            return true;
+        }
+        else if (id == R.id.action_favor) {
             NewsHandler.getHandler().sendFavorSaveRequest(news);
             Toast.makeText(this,"收藏成功", Toast.LENGTH_SHORT).show();
             return true;
@@ -93,6 +100,7 @@ public class NewsDetailActivity extends AppCompatActivity {
             oks.setUrl("http://sharesdk.cn");
             // 启动分享GUI
             oks.show(this);
+            return true;
         }
         return true;
     }
