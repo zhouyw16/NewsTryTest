@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,6 +33,8 @@ public class NewsListFragment extends Fragment {
 
     private NewsListAdapter mAdapter;      // recyclerview的适配器
     private NewsListPresenter mPresenter;  // 新闻事务管理类
+
+    private boolean isGettingMore = false;
 
 
     public NewsListFragment() {}
@@ -93,15 +96,24 @@ public class NewsListFragment extends Fragment {
 
         if (newsNum != 0 && mode == GET_NEW)
             recyclerView.smoothScrollToPosition(0);
+        else if (mode == GET_MORE)
+            mAdapter.setFooterVisibility(false);
         swipeRefreshLayout.setRefreshing(false);
     }
 
     // 加载新闻失败，发出通知
-    void onFailure() {
+    void onFailure(int mode) {
         getActivity().runOnUiThread(() -> {
             Toast.makeText(getContext(), "刷新失败", Toast.LENGTH_SHORT).show();
+            swipeRefreshLayout.setRefreshing(false);
+            if (mode == GET_MORE) {
+                recyclerView.smoothScrollToPosition(layoutManager.findFirstVisibleItemPosition());
+                new Handler().postDelayed(() -> {
+                    mAdapter.setFooterVisibility(false);
+                    isGettingMore = false;
+                }, 100);
+            }
         });
-        swipeRefreshLayout.setRefreshing(false);
     }
 
     //  初始加载新闻失败
@@ -123,7 +135,8 @@ public class NewsListFragment extends Fragment {
             if (newState == RecyclerView.SCROLL_STATE_IDLE
                     && lastItem == mAdapter.getItemCount() - 1
                     && !mPresenter.isLoading()
-                    && lastdy > 0) {
+                    && lastdy > 0 && !isGettingMore) {
+                isGettingMore = true;
                 mAdapter.setFooterVisibility(true);
                 recyclerView.smoothScrollToPosition(mAdapter.getItemCount());
                 mPresenter.getMoreNews();
