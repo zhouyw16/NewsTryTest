@@ -25,7 +25,7 @@
         android:usesCleartextTraffic="true">
         <activity
             android:name=".news.NewsDetailActivity"
-            android:label="@string/title_activity_news_detail"
+            android:label="DetailNews"
             android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
             android:name=".main.MainActivity"
