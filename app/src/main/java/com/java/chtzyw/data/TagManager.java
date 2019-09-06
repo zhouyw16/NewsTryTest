@@ -1,29 +1,30 @@
 package com.java.chtzyw.data;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 public class TagManager {
     public static class Tag {
         public String title;
         public int idx;
-        boolean visible = true;
+        public boolean visible = true;
+        public int weight = 0;
         public Tag(String title, int idx) { this.title = title; this.idx = idx; }
         public boolean isVisible() {
             return visible;
         }
     }
 
-    private static TagManager instance;
+    public class TagJson{
+        public List<Tag> tagJsonList;
+    }
 
-    private int[] tagWeight;
+    private static TagManager instance;
     private List<Tag> tagList;
 
     private TagManager() {
-        tagWeight = new int[12];
-        Arrays.fill(tagWeight, 0);
-        tagList = getDefaultTagList();
+        load();
     }
 
     public static TagManager getI() {
@@ -55,23 +56,25 @@ public class TagManager {
     }
 
     public void favour(String tag) {
-        tagWeight[getTagId(tag)] += 3;
+        tagList.get(getTagId(tag)).weight += 3;
     }
 
     public void dislike(String tag) {
-        tagWeight[getTagId(tag)] -= 3;
+        tagList.get(getTagId(tag)).weight -= 3;
     }
 
     public void looked(String tag) {
-        tagWeight[getTagId(tag)] += 1;
+        tagList.get(getTagId(tag)).weight += 1;
     }
 
     public void load() {
-
+        tagList=NewsHandler.getHandler().sendSettingLoadRequest();
     }
 
     public void save() {
-
+        TagJson tagJson=new TagJson();
+        tagJson.tagJsonList=tagList;
+        NewsHandler.getHandler().sendSettingSaveRequest(tagJson);
     }
 
     final public static String[] DEFAULT_TAGLIST = {
