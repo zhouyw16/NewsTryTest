@@ -13,6 +13,8 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.material.navigation.NavigationView;
 import com.java.chtzyw.R;
+import com.java.chtzyw.data.NewsHandler;
+import com.java.chtzyw.data.TagManager;
 import com.java.chtzyw.favourite.FavouriteFragment;
 import com.java.chtzyw.news.NewsFragment;
 import com.java.chtzyw.setting.SettingFragment;
@@ -45,6 +47,12 @@ public class MainActivity extends AppCompatActivity
         // 设置导航栏切换的回调函数
         mNavigationView.setNavigationItemSelectedListener(this);
         switchNavigation(currNavigationId);
+    }
+
+    @Override
+    protected void onDestroy() {
+        TagManager.getI().save();
+        super.onDestroy();
     }
 
     // 返回键回退导航栏

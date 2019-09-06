@@ -1,6 +1,7 @@
 package com.java.chtzyw.data;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.java.chtzyw.MainApplication;
@@ -287,6 +288,30 @@ public class NewsHandler {
         return deleteAll(path);
     }
 
+    /*加载分类列表设置*/
+    public List<TagManager.Tag> sendSettingLoadRequest(){
+        File path=mContext.getDir("setting", Context.MODE_PRIVATE);
+        File file=new File(path,"tag_setting.json");
+        if(file.exists()){
+            Gson gson=new Gson();
+            String jsonData=fileLoad(file);
+            TagManager.TagJson tagJson=gson.fromJson(jsonData,TagManager.TagJson.class);
+            return tagJson.tagJsonList;
+        }
+        else{
+            return TagManager.getDefaultTagList();
+        }
+    }
+
+    /*保存分类列表设置*/
+    public void sendSettingSaveRequest(TagManager.TagJson tagJson){
+        File path=mContext.getDir("setting", Context.MODE_PRIVATE);
+        File file=new File(path,"tag_setting.json");
+        Gson gson=new Gson();
+        String jsonData=gson.toJson(tagJson);
+        settingSave(file,jsonData);
+    }
+
     /*新闻内容过滤*/
     private void clearContent(News news){
         news.setContent(news.getContent().replaceAll("\\\n","\n"));
@@ -330,6 +355,29 @@ public class NewsHandler {
             return;
         }
 
+        FileWriter out=null;
+        BufferedWriter writer=null;
+        try {
+            out=new FileWriter(file);
+            writer=new BufferedWriter(out);
+            writer.write(inputText);
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
+        finally {
+            try{
+                if(writer!=null)
+                    writer.close();
+            }
+            catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /*设置保存*/
+    private void settingSave(File file,String inputText){
         FileWriter out=null;
         BufferedWriter writer=null;
         try {
