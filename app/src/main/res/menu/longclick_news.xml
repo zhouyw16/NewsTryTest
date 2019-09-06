@@ -2,11 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
 xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-    android:id="@+id/remove_news"
+    android:id="@+id/remove_news_menu_item"
     android:title="不感兴趣"
     app:showAsAction="never" />
     <item
-        android:id="@+id/favour_news"
+        android:id="@+id/favour_news_menu_item"
         android:title="收藏新闻"
         app:showAsAction="never" />
 

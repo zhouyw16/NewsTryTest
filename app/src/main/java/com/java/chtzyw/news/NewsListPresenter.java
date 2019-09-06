@@ -2,8 +2,6 @@ package com.java.chtzyw.news;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Handler;
-import android.util.Log;
 
 import com.java.chtzyw.data.News;
 import com.java.chtzyw.data.NewsHandler;
@@ -55,10 +53,6 @@ class NewsListPresenter {
     // 加载更多新闻，设置回调函数
     void getMoreNews() {
         loading = true;
-        /* 一个致命bug，当recyclerview正在滚动时，不能通知adapter的变化，
-         * 否则会导致recyclerview的崩溃。一般情况下都没触发这个bug，因为网络请求返回需要一定时间。
-         * 而在非联网模式下网络返回连接失败很快，这时recyclerview还在滚动，程序就会崩溃。
-         * 所以这里显式设置了0.1s延时 */
         NewsHandler.getHandler().sendLoadRequest(tagId, NEWS_NUM, new ResultListener() {
             @Override
             public void onSuccess(LinkedList<News> newsList, int newsNum) {

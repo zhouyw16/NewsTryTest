@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
@@ -24,6 +25,8 @@ import java.util.concurrent.TimeUnit;
 // 设置页的fragment
 public class SettingFragment extends Fragment {
     private MyAdapter myAdapter;     // recyclerview的适配器
+    private RecyclerView recyclerView;
+    private LinearLayoutManager layoutManager;
 
     public SettingFragment() {}
     public static SettingFragment newInstance() { return new SettingFragment(); }

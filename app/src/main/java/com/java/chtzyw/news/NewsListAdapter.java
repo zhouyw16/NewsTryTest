@@ -60,7 +60,7 @@ class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         PopupMenu popupMenu = new PopupMenu(currContext,view);
         popupMenu.getMenuInflater().inflate(R.menu.longclick_news, popupMenu.getMenu());
         popupMenu.setOnMenuItemClickListener((item) -> {
-                if (item.getItemId() == R.id.remove_news) {
+                if (item.getItemId() == R.id.remove_news_menu_item) {
                     removeItem(pos);
                     Toast.makeText(currContext, "将减少此类新闻推荐", Toast.LENGTH_SHORT).show();
                     TagManager.getI().dislike(getNews(pos).getCategory());
@@ -111,14 +111,8 @@ class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         if (getItemViewType(pos) == TYPE_FOOTER) return;
         // 设置view的内容
         News news =  newsList.get(pos);
-        ItemViewHolder item = (ItemViewHolder) holder;
-        item.mTitle.setText(news.getTitle());
-        item.mAuthor.setText(news.getPublisher());
-        item.mDate.setText(news.getPublishTime());
-        item.setImage(news.getCover());
-        int color = news.getHasRead() ? currContext.getColor(R.color.colorDetail)
-                                      : currContext.getColor(R.color.colorTitle);
-        item.mTitle.setTextColor(color);
+        ((ItemViewHolder) holder).setNews(news);
+
     }
 
     @Override
@@ -162,6 +156,17 @@ class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             // 绑定长按事件
             RxView.longClicks(view).subscribe((dummy) -> showPopMenu(mView, this.getLayoutPosition()));
         }
+
+        void setNews(News news) {
+            mTitle.setText(news.getTitle());
+            mAuthor.setText(news.getPublisher());
+            mDate.setText(news.getPublishTime());
+            setImage(news.getCover());
+            int color = news.getHasRead() ? currContext.getColor(R.color.colorDetail)
+                    : currContext.getColor(R.color.colorTitle);
+            mTitle.setTextColor(color);
+        }
+
 
         void setImage(String url) {
             if (url == null) {

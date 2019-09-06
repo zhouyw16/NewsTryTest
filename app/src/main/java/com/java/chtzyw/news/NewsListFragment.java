@@ -34,7 +34,7 @@ public class NewsListFragment extends Fragment {
     private NewsListAdapter mAdapter;      // recyclerview的适配器
     private NewsListPresenter mPresenter;  // 新闻事务管理类
 
-    private boolean isGettingMore = false;
+    private boolean isGettingMore = false; // 用于适配上拉刷新的状态
 
 
     public NewsListFragment() {}
@@ -107,6 +107,10 @@ public class NewsListFragment extends Fragment {
             Toast.makeText(getContext(), "刷新失败", Toast.LENGTH_SHORT).show();
             swipeRefreshLayout.setRefreshing(false);
             if (mode == GET_MORE) {
+                /* 一个致命bug，当recyclerview正在滚动时，不能通知adapter的变化，
+                 * 否则会导致recyclerview的崩溃。一般情况下都没触发这个bug，因为网络请求返回需要一定时间。
+                 * 而在非联网模式下网络返回连接失败很快，这时recyclerview还在滚动，程序就会崩溃。
+                 * 所以这里手动设置recyclerview回滚， 并显式设置了0.1s延时后隐藏进度条 */
                 recyclerView.smoothScrollToPosition(layoutManager.findFirstVisibleItemPosition());
                 new Handler().postDelayed(() -> {
                     mAdapter.setFooterVisibility(false);
