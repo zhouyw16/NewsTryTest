@@ -36,7 +36,9 @@ public class NewsHandler {
     }
     private NewsHandler(){
         mContext= MainApplication.getContextObject();
+        allNewsList=new ArrayList<>();
         favorList=new LinkedList<>();
+        favorHash=new HashSet<>();
         tagNewsHash=new HashSet<>();
         allNewsHash=new HashSet<>();
         recNewsHash=new HashSet<>();
@@ -44,6 +46,7 @@ public class NewsHandler {
         for(int i=0;i<12;i++)
             pageList.add(1);
         initAllNewsList();
+        initFavorList();
     }
     /*将全部本地内容读取至缓存，可以考虑以下两点：
      * 程序启动时直接创建NewsHandler对象
@@ -54,14 +57,12 @@ public class NewsHandler {
         File path=mContext.getDir("news",Context.MODE_PRIVATE);
         File[] files=path.listFiles();
         /*创建分类链表*/
-        allNewsList=new ArrayList<>();
         for(int i=0;i<12;i++){
             allNewsList.add(new LinkedList<News>());
         }
         /*缓存本地新闻*/
         Gson gson=new Gson();
         int loadNum=files.length<LOCAL_LOAD_MAX?files.length:LOCAL_LOAD_MAX;
-
         for(int i=0;i<loadNum;i++){
             News news=gson.fromJson(fileLoad(files[i]),News.class);
             allNewsList.get(0).addLast(news);
@@ -72,11 +73,26 @@ public class NewsHandler {
             recNewsHash.add(news.getNewsID());
         }
     }
+    /*将本地收藏读至缓存*/
+    private void initFavorList(){
+        File path=mContext.getDir("favor",Context.MODE_PRIVATE);
+        File[] files=path.listFiles();
+        Gson gson=new Gson();
+        if(files.length==0)
+            return;
+        for(File file:files){
+            String jsonData=fileLoad(file);
+            News news=gson.fromJson(jsonData,News.class);
+            favorList.addLast(news);
+            favorHash.add(news.getNewsID());
+        }
+    }
 
     private Context mContext;                   //文本内容，用于文件读写
     private List<LinkedList<News>> allNewsList; //各分类列表
     private LinkedList<News> favorList;         //收藏列表
-    private HashSet<String> tagNewsHash;        //分类新闻Id哈希表，用于判重
+    private HashSet<String> favorHash;          //收藏新闻Id哈希表
+    private HashSet<String> tagNewsHash;        //分类新闻Id哈希表
     private HashSet<String> allNewsHash;        //综合新闻Id哈希表
     private HashSet<String> recNewsHash;        //推荐新闻Id哈希表
     private List<Integer> pageList;             //类别页数
@@ -220,31 +236,52 @@ public class NewsHandler {
     /*删除新闻请求*/
     public void sendNewsDeleteRequest(List<News> newsList,int position){
         newsList.remove(position);
+        //如果先点进去新闻缓存了，
+        //再退出来删除新闻，可能会有点问题
+        //因为没从存储中把新闻删了
+    }
+
+    /*清除缓存请求*/
+    public boolean sendDeleteCacheRequest(){
+        for(LinkedList<News> newsList:allNewsList){
+            newsList.clear();
+        }
+        allNewsHash.clear();
+        tagNewsHash.clear();
+        recNewsHash.clear();
+        File path=mContext.getDir("news",Context.MODE_PRIVATE);
+        return deleteAll(path);
     }
 
     /*保存收藏请求*/
     public void sendFavorSaveRequest(News news){
         File path=mContext.getDir("favor",Context.MODE_PRIVATE);
-        //可以换成收藏时间+新闻ID
         File file=new File(path,news.getNewsID());
         Gson gson=new Gson();
         String jsonData=gson.toJson(news);
         fileSave(file,jsonData);
+        favorList.addFirst(news);
+        favorHash.add(news.getNewsID());
+    }
+
+    /*删除收藏请求*/
+    public boolean sendFavorDeleteRequest(News news){
+        File path=mContext.getDir("favor",Context.MODE_PRIVATE);
+        File file=new File(path,news.getNewsID());
+        return favorList.remove(news) && favorHash.remove(news.getNewsID()) && file.delete();
     }
 
     /*加载收藏请求*/
     public LinkedList<News> sendFavorLoadRequest(){
-        File path=mContext.getDir("favor",Context.MODE_PRIVATE);
-        File[] files=path.listFiles();
-        Gson gson=new Gson();
-        if(files.length==0)
-            return null;
-        for(File file:files){
-            String jsonData=fileLoad(file);
-            News news=gson.fromJson(jsonData,News.class);
-            favorList.addLast(news);
-        }
         return favorList;
+    }
+
+    /*清除全部收藏请求*/
+    public boolean sendFavorAllDeleteRequest(){
+        favorList.clear();
+        favorHash.clear();
+        File path=mContext.getDir("favor",Context.MODE_PRIVATE);
+        return deleteAll(path);
     }
 
     /*新闻内容过滤*/
@@ -310,4 +347,18 @@ public class NewsHandler {
             }
         }
     }
+
+    private boolean deleteAll(File path){
+        if(path.exists()){
+            File[] files=path.listFiles();
+            for(File file:files){
+                file.delete();
+            }
+            return path.delete();
+        }
+        else{
+            return false;
+        }
+    }
 }
+
