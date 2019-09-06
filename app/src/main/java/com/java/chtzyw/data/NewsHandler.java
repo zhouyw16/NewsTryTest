@@ -254,7 +254,9 @@ public class NewsHandler {
     }
 
     /*保存收藏请求*/
-    public void sendFavorSaveRequest(News news){
+    public boolean sendFavorSaveRequest(News news){
+        if(favorHash.contains(news.getNewsID()))
+            return false;
         File path=mContext.getDir("favor",Context.MODE_PRIVATE);
         File file=new File(path,news.getNewsID());
         Gson gson=new Gson();
@@ -262,6 +264,7 @@ public class NewsHandler {
         fileSave(file,jsonData);
         favorList.addFirst(news);
         favorHash.add(news.getNewsID());
+        return true;
     }
 
     /*删除收藏请求*/

@@ -81,8 +81,12 @@ public class NewsDetailActivity extends AppCompatActivity {
             return true;
         }
         else if (id == R.id.action_favor) {
-            NewsHandler.getHandler().sendFavorSaveRequest(news);
-            Toast.makeText(this,"收藏成功", Toast.LENGTH_SHORT).show();
+            if (NewsHandler.getHandler().sendFavorSaveRequest(news)) {
+                Toast.makeText(this, "收藏成功", Toast.LENGTH_SHORT).show();
+            }
+            else {
+                Toast.makeText(this, "已在收藏列表中", Toast.LENGTH_SHORT).show();
+            }
             return true;
         }
         else if(id==R.id.action_share){

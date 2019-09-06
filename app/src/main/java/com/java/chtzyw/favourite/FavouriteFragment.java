@@ -87,9 +87,9 @@ public class FavouriteFragment extends Fragment {
             popupMenu.getMenu().findItem(R.id.remove_news_menu_item).setTooltipText("取消收藏");
 
             popupMenu.setOnMenuItemClickListener((item) -> {
+                TagManager.getI().dislike(newsList.get(pos).getCategory());
                 removeItem(pos);
                 Toast.makeText(getContext(), "已取消收藏", Toast.LENGTH_SHORT).show();
-                TagManager.getI().dislike(newsList.get(pos).getCategory());
                 return true;
             });
             popupMenu.show();
@@ -97,7 +97,7 @@ public class FavouriteFragment extends Fragment {
 
         // 删除一个元素
         public void removeItem(int position) {
-//            NewsHandler.getHandler().sendFaRequest(newsList.get(position));
+            NewsHandler.getHandler().sendFavorDeleteRequest(newsList.get(position));
             this.notifyItemRemoved(position);
         }
 

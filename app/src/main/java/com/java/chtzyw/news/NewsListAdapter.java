@@ -61,16 +61,20 @@ class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         popupMenu.getMenuInflater().inflate(R.menu.longclick_news, popupMenu.getMenu());
         popupMenu.setOnMenuItemClickListener((item) -> {
                 if (item.getItemId() == R.id.remove_news_menu_item) {
+                    TagManager.getI().dislike(getNews(pos).getCategory());
                     removeItem(pos);
                     Toast.makeText(currContext, "将减少此类新闻推荐", Toast.LENGTH_SHORT).show();
-                    TagManager.getI().dislike(getNews(pos).getCategory());
                 }
                 else {
-                    Toast.makeText(currContext, "已收藏本条新闻", Toast.LENGTH_SHORT).show();
-                    News news = getNews(pos);
-                    TagManager.getI().favour(news.getCategory());
-                    // 记录收藏新闻
-                    NewsHandler.getHandler().sendFavorSaveRequest(getNews(pos));
+                    if(NewsHandler.getHandler().sendFavorSaveRequest(getNews(pos))) {
+                        Toast.makeText(currContext, "收藏成功", Toast.LENGTH_SHORT).show();
+                        News news = getNews(pos);
+                        TagManager.getI().favour(news.getCategory());
+                    }
+                    else {
+                        Toast.makeText(currContext, "已在收藏列表中", Toast.LENGTH_SHORT).show();
+                    }
+
                 }
                 return true;
         });
