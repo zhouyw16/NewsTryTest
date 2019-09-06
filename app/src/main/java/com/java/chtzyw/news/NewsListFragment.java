@@ -14,8 +14,12 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.os.Handler;
 import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
@@ -33,8 +37,11 @@ public class NewsListFragment extends Fragment {
 
     private NewsListAdapter mAdapter;      // recyclerview的适配器
     private NewsListPresenter mPresenter;  // 新闻事务管理类
+    private Context mContext;
 
     private boolean isGettingMore = false; // 用于适配上拉刷新的状态
+
+    private boolean gestureUp = false;
 
 
     public NewsListFragment() {}
@@ -58,6 +65,7 @@ public class NewsListFragment extends Fragment {
         mAdapter = new NewsListAdapter(getContext(), tagId);
         mPresenter = new NewsListPresenter(this, mAdapter, tagId);
         mAdapter.setOnItemClickListener((news)->mPresenter.openNewsDetail(getContext(), news));
+        mContext = getContext();
 
         // 如果本地没有缓存，则初始先加载一批新闻
         if (mAdapter.getItemCount() == 0)
@@ -84,6 +92,29 @@ public class NewsListFragment extends Fragment {
         recyclerView.setAdapter(mAdapter);
         // 上拉加载监听器
         recyclerView.addOnScrollListener(new OnLoadMoreListener());
+
+        /* 监听recyclerview的上划手势 */
+        recyclerView.setOnTouchListener(new View.OnTouchListener() {
+            private int lastY;
+
+            @Override
+            public boolean onTouch(View view, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        lastY = (int) event.getY();
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        recyclerView.performClick();
+                        int y = (int) event.getY();
+                        if ( lastY - y > ViewConfiguration.get(mContext).getScaledTouchSlop())
+                            gestureUp = true;
+                        else gestureUp = false;
+                        break;
+                }
+                return false;
+            }
+        });
+
         return view;
     }
 
@@ -103,15 +134,11 @@ public class NewsListFragment extends Fragment {
 
     // 加载新闻失败，发出通知
     void onFailure(int mode) {
+        System.out.println("onFailure: ");
         getActivity().runOnUiThread(() -> {
             Toast.makeText(getContext(), "刷新失败", Toast.LENGTH_SHORT).show();
             swipeRefreshLayout.setRefreshing(false);
             if (mode == GET_MORE) {
-                /* 一个致命bug，当recyclerview正在滚动时，不能通知adapter的变化，
-                 * 否则会导致recyclerview的崩溃。一般情况下都没触发这个bug，因为网络请求返回需要一定时间。
-                 * 而在非联网模式下网络返回连接失败很快，这时recyclerview还在滚动，程序就会崩溃。
-                 * 所以这里手动设置recyclerview回滚， 并显式设置了0.1s延时后隐藏进度条 */
-                recyclerView.smoothScrollToPosition(layoutManager.findFirstVisibleItemPosition());
                 new Handler().postDelayed(() -> {
                     mAdapter.setFooterVisibility(false);
                     isGettingMore = false;
@@ -127,20 +154,17 @@ public class NewsListFragment extends Fragment {
         });
     }
 
-    // 下拉刷新的监听器，重写了recyclerview的两个滑动监听器
+    // 上拉刷新的监听器，重写了recyclerview的两个滑动监听器
     private class OnLoadMoreListener extends RecyclerView.OnScrollListener {
         private int lastItem; // 当前最下面完整显示的卡片
-        private int lastdy;
 
         @Override
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
             super.onScrollStateChanged(recyclerView, newState);
             // 如果滑动到最后一张卡片，并且没有在加载，则申请加载新闻
-            if (newState == RecyclerView.SCROLL_STATE_IDLE
-                    && lastItem == mAdapter.getItemCount() - 1
-                    && !mPresenter.isLoading()
-                    && lastdy > 0 && !isGettingMore) {
-                isGettingMore = true;
+            if (!mPresenter.isLoading() && newState == RecyclerView.SCROLL_STATE_IDLE
+                    && lastItem == mAdapter.getItemCount() - 1 && gestureUp) {
+                gestureUp = false;
                 mAdapter.setFooterVisibility(true);
                 recyclerView.smoothScrollToPosition(mAdapter.getItemCount());
                 mPresenter.getMoreNews();
@@ -150,7 +174,6 @@ public class NewsListFragment extends Fragment {
         @Override
         public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
             super.onScrolled(recyclerView, dx, dy);
-            lastdy = dy;
             lastItem = layoutManager.findLastCompletelyVisibleItemPosition();
         }
     }

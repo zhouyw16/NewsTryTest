@@ -3,6 +3,7 @@ package com.java.chtzyw.main;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,6 +16,7 @@ import com.google.android.material.navigation.NavigationView;
 import com.java.chtzyw.R;
 import com.java.chtzyw.favourite.FavouriteFragment;
 import com.java.chtzyw.news.NewsFragment;
+import com.java.chtzyw.news.NewsListFragment;
 import com.java.chtzyw.setting.SettingFragment;
 
 // 主活动，管理导航栏和工具栏的响应事件
@@ -96,7 +98,6 @@ public class MainActivity extends AppCompatActivity
 //        drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-
 
     // 切换页面的一些辅助函数
     private void switchNavigation(int id) {

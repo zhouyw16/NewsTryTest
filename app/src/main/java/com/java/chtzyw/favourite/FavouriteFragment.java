@@ -33,7 +33,7 @@ import com.java.chtzyw.news.NewsDetailActivity;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-// 设置页的fragment
+// 收藏页的fragment
 public class FavouriteFragment extends Fragment {
     private MyAdapter mAdapter;     // recyclerview的适配器
 

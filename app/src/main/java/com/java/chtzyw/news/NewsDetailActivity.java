@@ -89,7 +89,7 @@ public class NewsDetailActivity extends AppCompatActivity {
             }
             return true;
         }
-        else if(id==R.id.action_share){
+        else if (id==R.id.action_share) {
             OnekeyShare oks = new OnekeyShare();
             // title标题，微信、QQ和QQ空间等平台使用
             oks.setTitle(news.getTitle());
