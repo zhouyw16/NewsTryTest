@@ -1,11 +1,16 @@
 package com.java.chtzyw.favourite;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.PointF;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.UiThread;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.MenuItemCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -14,12 +19,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import com.bumptech.glide.Glide;
 import com.jakewharton.rxbinding2.view.RxView;
@@ -44,7 +53,7 @@ public class FavouriteFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mAdapter = new MyAdapter(); // 初始化适配器
-
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -62,6 +71,46 @@ public class FavouriteFragment extends Fragment {
         recyclerView.setAdapter(mAdapter);
 
         return view;
+    }
+
+    // 创建右上角的菜单
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        menu.clear();
+        inflater.inflate(R.menu.favourite_toolbar,menu);
+    }
+
+    // 右上角菜单的响应事件
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_delete) {
+            AlertDialog dialog=new AlertDialog.Builder(getContext())
+                    .setMessage("是否确认删除全部收藏？")
+                    .setIcon(R.drawable.ic_favorite)
+                    .setPositiveButton("确认", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            NewsHandler.getHandler().sendFavorAllDeleteRequest();
+                            mAdapter.notifyDataSetChanged();
+                            Toast.makeText(getContext(),"收藏已全部清除",Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                        }
+                    })
+                    .create();
+            dialog.show();
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                    .setTextColor(ContextCompat.getColor(getContext(),R.color.colorPrimary));
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+                    .setTextColor(ContextCompat.getColor(getContext(),R.color.colorPrimary));
+
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     // 自定义的适配器
