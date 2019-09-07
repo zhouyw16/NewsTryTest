@@ -1,9 +1,12 @@
 package com.java.chtzyw.setting;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -54,8 +57,27 @@ public class SettingFragment extends Fragment {
         CardView clearCache = view.findViewById(R.id.clear_cache_button);
         RxView.clicks(clearCache).throttleFirst(500, TimeUnit.MILLISECONDS)
                 .subscribe((dummy) -> {
-                    Toast.makeText(getContext(), "已清空本地缓存", Toast.LENGTH_SHORT).show();
-                    NewsHandler.getHandler().sendDeleteCacheRequest();
+                    AlertDialog dialog=new AlertDialog.Builder(getContext())
+                            .setMessage("是否确认清空本地缓存？")
+                            .setIcon(R.drawable.ic_favorite)
+                            .setPositiveButton("确认", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    Toast.makeText(getContext(), "已清空本地缓存", Toast.LENGTH_SHORT).show();
+                                    NewsHandler.getHandler().sendDeleteCacheRequest();
+                                }
+                            })
+                            .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                }
+                            })
+                            .create();
+                    dialog.show();
+                    dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                            .setTextColor(ContextCompat.getColor(getContext(),R.color.colorPrimary));
+                    dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+                            .setTextColor(ContextCompat.getColor(getContext(),R.color.colorPrimary));
                 });
 
         // 使用recyclerview管理网格布局

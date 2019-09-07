@@ -5,7 +5,6 @@ import android.content.Context;
 
 import com.java.chtzyw.data.NewsHandler;
 import com.java.chtzyw.data.TagManager;
-import com.mob.MobSDK;
 
 public class MainApplication extends Application {
     private static Context context;
@@ -17,7 +16,6 @@ public class MainApplication extends Application {
         context = getApplicationContext();
         NewsHandler.getHandler();
         TagManager.getI();
-        MobSDK.init(this);
     }
 
     //返回
