@@ -2,14 +2,22 @@ package com.java.chtzyw.data;
 
 import android.content.Context;
 
+import android.net.Uri;
+
+
+
 import com.google.gson.Gson;
 import com.java.chtzyw.MainApplication;
 import com.java.chtzyw.search.HistoryJson;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.ByteArrayInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -21,6 +29,7 @@ import java.io.IOException;
 
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
@@ -461,6 +470,36 @@ public class NewsHandler {
         else{
             return false;
         }
+    }
+
+    public Uri sendUrl2UriRequest(News news){
+        File path=mContext.getExternalFilesDir("picture");
+        File file=new File(path,news.getNewsID());
+        downloadPicture(file, news.getCover(), new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+            }
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                byte[] imageByte = response.body().bytes();
+                InputStream is = new ByteArrayInputStream(imageByte);
+                OutputStream os = new FileOutputStream(file);
+                byte[] buff = new byte[1024];
+                int len = 0;
+                while ((len = is.read(buff)) != -1) {
+                    os.write(buff, 0, len);
+                }
+                is.close();
+                os.close();
+            }
+        });
+        return Uri.fromFile(file);
+    }
+
+    private void downloadPicture(File file,String imageUrl,okhttp3.Callback callback) {
+        OkHttpClient client=new OkHttpClient();
+        Request request=new Request.Builder().url(imageUrl).build();
+        client.newCall(request).enqueue(callback);
     }
 
     /*新闻内容过滤*/
