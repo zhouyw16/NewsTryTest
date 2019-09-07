@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +36,12 @@ public class SettingFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         myAdapter = new MyAdapter(); // 初始化适配器
+    }
+
+    @Override
+    public void onDestroy() {           //退出前
+        TagManager.getI().save();       //保存分类设置
+        super.onDestroy();
     }
 
     @Override

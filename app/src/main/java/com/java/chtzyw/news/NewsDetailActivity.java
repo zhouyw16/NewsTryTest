@@ -64,14 +64,12 @@ public class NewsDetailActivity extends AppCompatActivity {
         }
     }
 
-    /*显示右上方三点按钮*/
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.detail_toolbar, menu);
         return true;
     }
 
-    /*三点按钮点击事件*/
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
