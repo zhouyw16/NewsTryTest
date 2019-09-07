@@ -47,7 +47,7 @@ public class NewsDetailActivity extends AppCompatActivity {
     }
 
     private void setNews() {
-        System.out.println(news.getNewsID());
+        System.out.println(news.getVideo());
 
         TextView textTitle=findViewById(R.id.text_title);
         TextView textIntro=findViewById(R.id.text_intro);
@@ -88,7 +88,6 @@ public class NewsDetailActivity extends AppCompatActivity {
 
     }
 
-    /*显示右上方三点按钮*/
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.detail_toolbar, menu);
@@ -102,7 +101,6 @@ public class NewsDetailActivity extends AppCompatActivity {
         return true;
     }
 
-    /*三点按钮点击事件*/
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();

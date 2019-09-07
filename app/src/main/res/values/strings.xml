@@ -19,5 +19,6 @@
     <string name="tag_setting_list_text">点击添加或删除新闻分类：</string>
 
     <string name="title_activity_news_detail">NewsDetailActivity</string>
+    <string name="title_activity_search">SearchActivity</string>
 
 </resources>

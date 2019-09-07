@@ -1,34 +1,24 @@
-package com.java.chtzyw.favourite;
+package com.java.chtzyw.search;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.PointF;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.UiThread;
-import androidx.core.content.ContextCompat;
-import androidx.core.view.MenuItemCompat;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.DefaultItemAnimator;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.LinearSmoothScroller;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.Toolbar;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.LinearSmoothScroller;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.jakewharton.rxbinding2.view.RxView;
@@ -44,28 +34,32 @@ import java.util.concurrent.TimeUnit;
 
 import cn.jzvd.JzvdStd;
 
-// 收藏页的fragment
-public class FavouriteFragment extends Fragment {
+// 搜索结果的fragment
+public class ResultFragment extends Fragment {
     private MyAdapter mAdapter;     // recyclerview的适配器
 
-    public FavouriteFragment() {}
-    public static FavouriteFragment newInstance() { return new FavouriteFragment(); }
+    public ResultFragment() {}
+    public static ResultFragment newInstance() { return new ResultFragment(); }
+
+    public void refreshView(){
+        mAdapter.notifyDataSetChanged();
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mAdapter = new MyAdapter(); // 初始化适配器
-        setHasOptionsMenu(true);
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_favourite, container, false);
+        View view = inflater.inflate(R.layout.fragment_search_result, container, false);
 
         // 配置recyclerview的样式
-        RecyclerView recyclerView = view.findViewById(R.id.favourite_list_view);
+        RecyclerView recyclerView = view.findViewById(R.id.result_list_view);
         LinearLayoutManager layoutManager = new ScrollSpeedLinearLayoutManger(getContext());
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
@@ -75,46 +69,6 @@ public class FavouriteFragment extends Fragment {
         return view;
     }
 
-    // 创建右上角的菜单
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        menu.clear();
-        inflater.inflate(R.menu.favourite_toolbar,menu);
-    }
-
-    // 右上角菜单的响应事件
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_delete) {
-            AlertDialog dialog=new AlertDialog.Builder(getContext())
-                    .setMessage("是否确认删除全部收藏？")
-                    .setIcon(R.drawable.ic_favorite)
-                    .setPositiveButton("确认", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            NewsHandler.getHandler().sendFavorAllDeleteRequest();
-                            mAdapter.notifyDataSetChanged();
-                            Toast.makeText(getContext(),"收藏已全部清除",Toast.LENGTH_SHORT).show();
-                        }
-                    })
-                    .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                        }
-                    })
-                    .create();
-            dialog.show();
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                    .setTextColor(ContextCompat.getColor(getContext(),R.color.colorPrimary));
-            dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
-                    .setTextColor(ContextCompat.getColor(getContext(),R.color.colorPrimary));
-
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
     // 自定义的适配器
     private class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         private List<News> newsList;
@@ -122,35 +76,11 @@ public class FavouriteFragment extends Fragment {
         // 构造函数中初始化标签列表
         MyAdapter() {
             super();
-            newsList = NewsHandler.getHandler().sendFavorLoadRequest();
+            newsList = NewsHandler.getHandler().sendSearchResultLoadRequest();
         }
 
         @Override
         public int getItemCount() { return newsList.size(); }
-
-        // 长按弹出的菜单
-        void showPopMenu(View view,final int pos) {
-            PopupMenu popupMenu = new PopupMenu(getContext(), view);
-            popupMenu.getMenuInflater().inflate(R.menu.longclick_news, popupMenu.getMenu());
-
-            // 复用一下长按弹出菜单的布局
-            popupMenu.getMenu().findItem(R.id.favour_news_menu_item).setVisible(false);
-            popupMenu.getMenu().findItem(R.id.remove_news_menu_item).setTitle("取消收藏");
-
-            popupMenu.setOnMenuItemClickListener((item) -> {
-                TagManager.getI().dislike(newsList.get(pos).getCategory());
-                removeItem(pos);
-                Toast.makeText(getContext(), "已取消收藏", Toast.LENGTH_SHORT).show();
-                return true;
-            });
-            popupMenu.show();
-        }
-
-        // 删除一个元素
-        public void removeItem(int position) {
-            NewsHandler.getHandler().sendFavorDeleteRequest(newsList.get(position));
-            this.notifyItemRemoved(position);
-        }
 
         @NonNull
         @Override
@@ -191,8 +121,6 @@ public class FavouriteFragment extends Fragment {
                             intent.putExtra("news_detail",news);
                             getContext().startActivity(intent);
                         });
-                // 绑定长按事件
-                RxView.longClicks(view).subscribe((dummy) -> showPopMenu(mView, getLayoutPosition()));
             }
 
             void setNews(News news) {
@@ -241,7 +169,7 @@ public class FavouriteFragment extends Fragment {
                     new LinearSmoothScroller(recyclerView.getContext()) {
                         @Override
                         public PointF computeScrollVectorForPosition(int targetPosition) {
-                            return FavouriteFragment.ScrollSpeedLinearLayoutManger.this
+                            return ResultFragment.ScrollSpeedLinearLayoutManger.this
                                     .computeScrollVectorForPosition(targetPosition);
                         }
 

@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.google.gson.Gson;
 import com.java.chtzyw.MainApplication;
+import com.java.chtzyw.search.HistoryJson;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -37,6 +38,8 @@ public class NewsHandler {
         mContext= MainApplication.getContextObject();
         allNewsList=new ArrayList<>();
         favorList=new LinkedList<>();
+        searchResultList=new LinkedList<>();
+        historyList=new LinkedList<>();
         favorHash=new HashSet<>();
         tagNewsHash=new HashSet<>();
         allNewsHash=new HashSet<>();
@@ -46,6 +49,7 @@ public class NewsHandler {
             pageList.add(1);
         initAllNewsList();
         initFavorList();
+        initHistoryList();
     }
     /*将全部本地内容读取至缓存，可以考虑以下两点：
      * 程序启动时直接创建NewsHandler对象
@@ -86,10 +90,23 @@ public class NewsHandler {
             favorHash.add(news.getNewsID());
         }
     }
+    /*将本地历史记录读至缓存*/
+    private void initHistoryList(){
+        File path=mContext.getDir("setting",Context.MODE_PRIVATE);
+        File file=new File(path,"search_history.json");
+        if(file.exists()){
+            Gson gson=new Gson();
+            String jsonData=fileLoad(file);
+            HistoryJson historyJson=gson.fromJson(jsonData, HistoryJson.class);
+            historyList=historyJson.getRecords();
+        }
+    }
 
     private Context mContext;                   //文本内容，用于文件读写
     private List<LinkedList<News>> allNewsList; //各分类列表
     private LinkedList<News> favorList;         //收藏列表
+    private LinkedList<News> searchResultList;  //搜索结果列表
+    private LinkedList<String> historyList;     //历史记录列表
     private HashSet<String> favorHash;          //收藏新闻Id哈希表
     private HashSet<String> tagNewsHash;        //分类新闻Id哈希表
     private HashSet<String> allNewsHash;        //综合新闻Id哈希表
@@ -282,6 +299,34 @@ public class NewsHandler {
 
     }
 
+    /*搜索新闻请求*/
+    public void sendSearchRequest(String keyWord,int needNum,ResultListener resultListener){
+
+        HttpClient httpClient;
+        httpClient=new HttpClient.Builder()
+                .setSize(needNum)
+                .setWords(keyWord)
+                .build();
+        Request request=new Request.Builder().url(httpClient.getNewsUrl()).build();
+        httpClient.getOkHttpClient().newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                resultListener.onFailure(-1);
+            }
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                String jsonData=response.body().string();
+                Gson gson=new Gson();
+                NewsJson newsJson=gson.fromJson(jsonData,NewsJson.class);
+                for(News news:newsJson.getData()){
+                    clearContent(news);
+                    clearImage(news);
+                    searchResultList.addFirst(news);
+                }
+                resultListener.onSuccess(searchResultList,searchResultList.size());
+            }
+        });
+    }
 
     /*保存新闻请求*/
     public void sendNewsSaveRequest(News news){
@@ -366,6 +411,56 @@ public class NewsHandler {
         Gson gson=new Gson();
         String jsonData=gson.toJson(tagJson);
         settingSave(file,jsonData);
+    }
+
+    /*获取搜索结果列表*/
+    public LinkedList<News> sendSearchResultLoadRequest() {
+        return searchResultList;
+    }
+
+    /*清空搜索结果列表*/
+    public void sendSearchResultClearRequest(){
+        searchResultList.clear();
+    }
+
+    /*获取历史记录列表*/
+    public LinkedList<String> sendHistoryLoadRequest() {
+        return historyList;
+    }
+
+    /*添加某一历史记录*/
+    public void sendHistoryAddRequest(String record){
+        historyList.remove(record);
+        historyList.addFirst(record);
+    }
+
+    /*删除某一历史记录*/
+    public void sendHistoryDeleteRequest(int position){
+        historyList.remove(position);
+    }
+
+    /*保存历史记录列表*/
+    public void sendHistorySaveRequest(){
+        File path=mContext.getDir("setting",Context.MODE_PRIVATE);
+        File file=new File(path,"search_history.json");
+        Gson gson=new Gson();
+        HistoryJson historyJson=new HistoryJson();
+        historyJson.setRecords(historyList);
+        String jsonData=gson.toJson(historyJson);
+        settingSave(file,jsonData);
+    }
+
+    /*清空历史记录*/
+    public boolean sendHistoryAllDeleteRequest(){
+        historyList.clear();
+        File path=mContext.getDir("setting",Context.MODE_PRIVATE);
+        File file=new File(path,"search_history.json");
+        if(file.exists()) {
+            return file.delete();
+        }
+        else{
+            return false;
+        }
     }
 
     /*新闻内容过滤*/
@@ -457,9 +552,11 @@ public class NewsHandler {
 
     private boolean deleteAll(File path){
         if(path.exists()){
-            File[] files=path.listFiles();
-            for(File file:files){
-                file.delete();
+            if(path.isDirectory()){
+                File[] files=path.listFiles();
+                for(File file:files){
+                    file.delete();
+                }
             }
             return path.delete();
         }

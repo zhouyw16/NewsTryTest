@@ -23,6 +23,8 @@ import com.java.chtzyw.data.TagManager;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import cn.jzvd.JzvdStd;
+
 class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final static int TYPE_CONTENT = 0; // 正常内容
@@ -139,6 +141,7 @@ class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         View mView;
         TextView mTitle, mAuthor, mDate;
         ImageView mImage;
+        JzvdStd mVideo;
         ItemViewHolder(View view) {
             super(view);
             mView = view;
@@ -146,6 +149,7 @@ class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             mAuthor = view.findViewById(R.id.text_author);
             mDate = view.findViewById(R.id.text_date);
             mImage = view.findViewById(R.id.image_view);
+            mVideo = view.findViewById(R.id.news_video);
 
             // 绑定点击事件，过滤频繁操作
             RxView.clicks(view).throttleFirst(500, TimeUnit.MILLISECONDS)
@@ -165,10 +169,19 @@ class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             mTitle.setText(news.getTitle());
             mAuthor.setText(news.getPublisher());
             mDate.setText(news.getPublishTime());
-            setImage(news.getCover());
             int color = news.getHasRead() ? currContext.getColor(R.color.card_title_hasread)
                     : currContext.getColor(R.color.card_title);
             mTitle.setTextColor(color);
+            if (news.getVideo().isEmpty()) {
+                mImage.setVisibility(View.VISIBLE);
+                mVideo.setVisibility(View.GONE);
+                setImage(news.getCover());
+            }
+            else {
+                mImage.setVisibility(View.GONE);
+                mVideo.setVisibility(View.VISIBLE);
+                mVideo.setUp(news.getVideo(), news.getTitle());
+            }
         }
 
 
