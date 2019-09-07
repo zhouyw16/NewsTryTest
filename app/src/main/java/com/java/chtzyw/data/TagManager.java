@@ -11,6 +11,7 @@ public class TagManager {
         public boolean visible = true;
         public int weight = 0;
         public Tag(String title, int idx) { this.title = title; this.idx = idx; }
+        public Tag(String title, int idx, int weight) {this.title = title; this.idx = idx; this.weight = weight;}
         public boolean isVisible() {
             return visible;
         }
@@ -32,6 +33,21 @@ public class TagManager {
             instance = new TagManager();
         return instance;
     }
+
+    public ArrayList<Integer> getRecommendTagList() {
+        ArrayList<Tag> tmp = new ArrayList<>();
+        for (Tag tag : tagList) {
+            if (tag.visible && tag.idx > 1)
+                tmp.add(new Tag(tag.title, tag.idx, tag.weight));
+        }
+        tmp.sort((t1, t2) -> t2.weight - t1.weight);
+        ArrayList<Integer> res = new ArrayList<>();
+        for (Tag tag : tmp)
+            res.add(tag.idx);
+        if (res.size() == 0) res.add(0);
+        return res;
+    }
+
 
     public List<Tag> getVisibleTagList() {
         ArrayList<Tag> list = new ArrayList<>();

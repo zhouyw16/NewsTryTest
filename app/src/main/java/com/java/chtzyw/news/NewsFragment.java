@@ -35,9 +35,6 @@ public class NewsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         List<TagManager.Tag> tagList = TagManager.getI().getVisibleTagList();
-        for (TagManager.Tag tag : tagList) {
-            System.out.println(tag.title+tag.idx+tag.isVisible());
-        }
         pageAdapter = new MyPageAdapter(getChildFragmentManager(), tagList);
     }
 

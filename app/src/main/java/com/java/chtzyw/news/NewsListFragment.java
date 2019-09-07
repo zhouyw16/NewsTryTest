@@ -39,9 +39,8 @@ public class NewsListFragment extends Fragment {
     private NewsListPresenter mPresenter;  // 新闻事务管理类
     private Context mContext;
 
-    private boolean isGettingMore = false; // 用于适配上拉刷新的状态
-
-    private boolean gestureUp = false;
+    private boolean gestureUp = false;     // 是否为上拉刷新的手势
+    private int lastClickedPosition = -1;  // 上次点击的新闻位置
 
 
     public NewsListFragment() {}
@@ -64,7 +63,9 @@ public class NewsListFragment extends Fragment {
 
         mAdapter = new NewsListAdapter(getContext(), tagId);
         mPresenter = new NewsListPresenter(this, mAdapter, tagId);
-        mAdapter.setOnItemClickListener((news)->mPresenter.openNewsDetail(getContext(), news));
+        mAdapter.setOnItemClickListener((news)->{
+            mPresenter.openNewsDetail(getContext(), news);
+        });
         mContext = getContext();
 
         // 如果本地没有缓存，则初始先加载一批新闻
@@ -134,14 +135,12 @@ public class NewsListFragment extends Fragment {
 
     // 加载新闻失败，发出通知
     void onFailure(int mode) {
-        System.out.println("onFailure: ");
         getActivity().runOnUiThread(() -> {
             Toast.makeText(getContext(), "刷新失败", Toast.LENGTH_SHORT).show();
             swipeRefreshLayout.setRefreshing(false);
             if (mode == GET_MORE) {
                 new Handler().postDelayed(() -> {
                     mAdapter.setFooterVisibility(false);
-                    isGettingMore = false;
                 }, 100);
             }
         });

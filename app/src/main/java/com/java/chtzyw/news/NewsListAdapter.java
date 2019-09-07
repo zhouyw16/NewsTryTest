@@ -153,7 +153,7 @@ class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         if (itemClickListener != null) {
                             News news= getNews(getLayoutPosition());
                             news.setHasRead(true);
-                            mTitle.setTextColor(currContext.getColor(R.color.colorDetail));
+                            mTitle.setTextColor(currContext.getColor(R.color.card_title_hasread));
                             itemClickListener.onItemClick(news);
                         }
                     });
@@ -166,8 +166,8 @@ class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             mAuthor.setText(news.getPublisher());
             mDate.setText(news.getPublishTime());
             setImage(news.getCover());
-            int color = news.getHasRead() ? currContext.getColor(R.color.colorDetail)
-                    : currContext.getColor(R.color.colorTitle);
+            int color = news.getHasRead() ? currContext.getColor(R.color.card_title_hasread)
+                    : currContext.getColor(R.color.card_title);
             mTitle.setTextColor(color);
         }
 

@@ -6,6 +6,11 @@
     <dimen name="nav_header_height">176dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
 
+    <dimen name="news_detail_horizontal_margin">14dp</dimen>
+    <dimen name="news_detail_title_size">24dp</dimen>
+    <dimen name="news_detail_intro_size">14dp</dimen>
+    <dimen name="news_detail_text_size">16dp</dimen>
+
     <color name="colorNavTitle">#eeeeee</color>
 
     <color name="colorTabSelectedText">#31d7d7</color>
@@ -24,11 +29,13 @@
 
     <color name="colorBackground">#1A1A1A</color>
     <color name="colorBackgroundLight">#0D0D0D</color>
-    <color name="colorDetail">#CCCCCC</color>
-    <color name="colorText">#CCCCCC</color>
-    <color name="colorTitle">#777777</color>
+    <color name="card_title_hasread">#CCCCCC</color>
+    <color name="card_text">#CCCCCC</color>
+    <color name="card_title">#777777</color>
 
-    <color name="colorDivider">#FFFFFF</color>
+    <color name="news_detail_title">#000000</color>
+    <color name="news_detail_text">#000000</color>
+    <color name="news_detail_intro">#AAAAAA</color>
 
     <dimen name="list_image_height">72dp</dimen>
     <dimen name="list_image_width">108dp</dimen>

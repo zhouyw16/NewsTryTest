@@ -1,7 +1,6 @@
 package com.java.chtzyw.data;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.google.gson.Gson;
 import com.java.chtzyw.MainApplication;
@@ -18,7 +17,6 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.util.Random;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -110,23 +108,16 @@ public class NewsHandler {
 
     /*各分类下拉刷新*/
     public void sendRefreshRequest(int categoryId,int needNum,ResultListener resultListener){
-
-        HttpClient httpClient;
         /*推荐页单独处理*/
         if(categoryId==1){
-            Random rand=new Random();
-            int searchId=rand.nextInt(10)+2;
-            httpClient=new HttpClient.Builder()
-                    .setSize(needNum)
-                    .setCategories(searchId)
-                    .build();
+            new RecommendHandler(resultListener, true).handle();
+            return;
         }
-        else{
-            httpClient=new HttpClient.Builder()
+        HttpClient httpClient = new HttpClient.Builder()
                     .setSize(needNum)
                     .setCategories(categoryId)
                     .build();
-        }
+
         Request request=new Request.Builder().url(httpClient.getNewsUrl()).build();
         httpClient.getOkHttpClient().newCall(request).enqueue(new Callback() {
             @Override
@@ -146,13 +137,7 @@ public class NewsHandler {
                         allNewsList.get(categoryId).addFirst(news);
                         allNewsHash.add(news.getNewsID());
                     }
-                    else if(categoryId==1&&!recNewsHash.contains(news.getNewsID())){
-                        clearContent(news);
-                        clearImage(news);
-                        allNewsList.get(categoryId).addFirst(news);
-                        recNewsHash.add(news.getNewsID());
-                    }
-                    else if(categoryId>1&&!tagNewsHash.contains(news.getNewsID())){
+                    else if(categoryId > 1 && !tagNewsHash.contains(news.getNewsID())){
                         clearContent(news);
                         clearImage(news);
                         allNewsList.get(categoryId).addFirst(news);
@@ -167,25 +152,18 @@ public class NewsHandler {
 
     /*各分类上拉加载*/
     public void sendLoadRequest(int categoryId,int needNum,ResultListener resultListener){
-        pageList.set(categoryId,pageList.get(categoryId)+1);
-        HttpClient httpClient;
         /*推荐页单独处理*/
         if(categoryId==1){
-            Random rand=new Random();
-            int searchId=rand.nextInt(10)+2;
-            httpClient=new HttpClient.Builder()
-                    .setSize(needNum)
-                    .setCategories(searchId)
-                    .setPage(pageList.get(categoryId))
-                    .build();
+            new RecommendHandler(resultListener, false).handle();
+            return;
         }
-        else{
-            httpClient=new HttpClient.Builder()
+        pageList.set(categoryId,pageList.get(categoryId)+1);
+        HttpClient httpClient = new HttpClient.Builder()
                     .setSize(needNum)
                     .setCategories(categoryId)
                     .setPage(pageList.get(categoryId))
                     .build();
-        }
+
         Request request=new Request.Builder().url(httpClient.getNewsUrl()).build();
         httpClient.getOkHttpClient().newCall(request).enqueue(new Callback() {
             @Override
@@ -205,14 +183,7 @@ public class NewsHandler {
                         allNewsList.get(categoryId).addLast(news);
                         allNewsHash.add(news.getNewsID());
                     }
-                    else if(categoryId==1&&!recNewsHash.contains(news.getNewsID()))
-                    {
-                        clearContent(news);
-                        clearImage(news);
-                        allNewsList.get(categoryId).addLast(news);
-                        recNewsHash.add(news.getNewsID());
-                    }
-                    else if(categoryId>1&&!tagNewsHash.contains(news.getNewsID())){
+                    else if(categoryId > 1 && !tagNewsHash.contains(news.getNewsID())){
                         clearContent(news);
                         clearImage(news);
                         allNewsList.get(categoryId).addLast(news);
@@ -224,6 +195,93 @@ public class NewsHandler {
             }
         });
     }
+
+    // 专门处理推荐逻辑的类
+    class RecommendHandler {
+        int cnt = 0, limit;
+        boolean refresh;
+        boolean complete = true;
+        ResultListener listener;
+        ArrayList<News> result = new ArrayList<>();
+        ArrayList<Integer> sizeList = new ArrayList<>();
+        ArrayList<Integer> tagList;
+
+        RecommendHandler(ResultListener listener, boolean refresh) {
+            this.listener = listener;
+            this.refresh = refresh;
+            tagList = TagManager.getI().getRecommendTagList();
+            limit = tagList.size() > 2 ? 3 : tagList.size();
+            if (limit > 2) {
+                sizeList.add(5); sizeList.add(3); sizeList.add(2);
+            }
+            else if (limit == 2) {
+                sizeList.add(7); sizeList.add(3);
+            }
+            else sizeList.add(10);
+        }
+
+        void handle() {
+            for (int i = 0; i < limit; i++) {
+                int tag = tagList.get(i);
+                pageList.set(tag ,pageList.get(tag)+1);
+                HttpClient httpClient = new HttpClient.Builder()
+                        .setSize(sizeList.get(i))
+                        .setCategories(tag)
+                        .setPage(pageList.get(tag))
+                        .build();
+                Request request=new Request.Builder().url(httpClient.getNewsUrl()).build();
+                httpClient.getOkHttpClient().newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                        onFail();
+                    }
+                    @Override
+                    public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                        String jsonData=response.body().string();
+                        Gson gson=new Gson();
+                        NewsJson newsJson=gson.fromJson(jsonData,NewsJson.class);
+                        onSucc(newsJson);
+                    }
+                });
+            }
+        }
+
+        synchronized void onFail() {
+            cnt++;
+            complete = false;
+            if (cnt == limit) onFinal();
+        }
+
+        synchronized void onSucc(NewsJson json) {
+            for (News news : json.getData()) {
+                if(!recNewsHash.contains(news.getNewsID())){
+                    clearContent(news);
+                    clearImage(news);
+                    result.add(news);
+                }
+            }
+            cnt++;
+            if (cnt == limit) onFinal();
+        }
+
+        void onFinal() {
+
+            if (!complete) listener.onFailure(-1);
+            int tag = 1;
+            int pastSize = allNewsList.get(tag).size();
+            for (News news : result) {
+                allNewsHash.add(news.getNewsID());
+                if (refresh)
+                    allNewsList.get(tag).addFirst(news);
+                else
+                    allNewsList.get(tag).addLast(news);
+            }
+            int nowSize=allNewsList.get(tag).size();
+            listener.onSuccess(allNewsList.get(tag),nowSize-pastSize);
+        }
+
+    }
+
 
     /*保存新闻请求*/
     public void sendNewsSaveRequest(News news){
@@ -244,12 +302,6 @@ public class NewsHandler {
 
     /*清除缓存请求*/
     public boolean sendDeleteCacheRequest(){
-        for(LinkedList<News> newsList:allNewsList){
-            newsList.clear();
-        }
-        allNewsHash.clear();
-        tagNewsHash.clear();
-        recNewsHash.clear();
         File path=mContext.getDir("news",Context.MODE_PRIVATE);
         return deleteAll(path);
     }
@@ -266,6 +318,10 @@ public class NewsHandler {
         favorList.addFirst(news);
         favorHash.add(news.getNewsID());
         return true;
+    }
+
+    public boolean sendIsFavouredRequest(News news) {
+        return favorHash.contains(news.getNewsID());
     }
 
     /*删除收藏请求*/
@@ -314,7 +370,7 @@ public class NewsHandler {
 
     /*新闻内容过滤*/
     private void clearContent(News news){
-        news.setContent(news.getContent().replaceAll("\\\n","\n"));
+        news.setContent(news.getContent().replaceAll("\\\\n","\n"));
     }
 
     /*新闻图片过滤*/

@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import com.jakewharton.rxbinding2.view.RxView;
 import com.java.chtzyw.R;
+import com.java.chtzyw.data.NewsHandler;
 import com.java.chtzyw.data.TagManager;
 
 import java.util.List;
@@ -25,8 +26,6 @@ import java.util.concurrent.TimeUnit;
 // 设置页的fragment
 public class SettingFragment extends Fragment {
     private MyAdapter myAdapter;     // recyclerview的适配器
-    private RecyclerView recyclerView;
-    private LinearLayoutManager layoutManager;
 
     public SettingFragment() {}
     public static SettingFragment newInstance() { return new SettingFragment(); }
@@ -42,6 +41,12 @@ public class SettingFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_setting, container, false);
+        CardView clearCache = view.findViewById(R.id.clear_cache_button);
+        RxView.clicks(clearCache).throttleFirst(500, TimeUnit.MILLISECONDS)
+                .subscribe((dummy) -> {
+                    Toast.makeText(getContext(), "已清空本地缓存", Toast.LENGTH_SHORT).show();
+                    NewsHandler.getHandler().sendDeleteCacheRequest();
+                });
 
         // 使用recyclerview管理网格布局
         RecyclerView recyclerView = view.findViewById(R.id.tag_setting_list);

@@ -84,7 +84,7 @@ public class FavouriteFragment extends Fragment {
 
             // 复用一下长按弹出菜单的布局
             popupMenu.getMenu().findItem(R.id.favour_news_menu_item).setVisible(false);
-            popupMenu.getMenu().findItem(R.id.remove_news_menu_item).setTooltipText("取消收藏");
+            popupMenu.getMenu().findItem(R.id.remove_news_menu_item).setTitle("取消收藏");
 
             popupMenu.setOnMenuItemClickListener((item) -> {
                 TagManager.getI().dislike(newsList.get(pos).getCategory());

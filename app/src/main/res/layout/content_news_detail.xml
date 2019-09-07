@@ -14,16 +14,24 @@
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginHorizontal="@dimen/news_detail_horizontal_margin">
 
             <TextView
                 android:id="@+id/text_title"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/news_detail_title_size"
+                android:textColor="@color/news_detail_title"
+                android:layout_marginBottom="10dp"/>
             <TextView
                 android:id="@+id/text_intro"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/news_detail_intro_size"
+                android:textColor="@color/news_detail_intro"
+                android:layout_marginBottom="10dp"/>
             <ImageView
                 android:id="@+id/image_start"
                 android:layout_width="match_parent"
@@ -32,7 +40,11 @@
             <TextView
                 android:id="@+id/text_content"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/news_detail_text_size"
+                android:lineSpacingExtra="3dp"
+                android:lineSpacingMultiplier="1"
+                android:textColor="@color/news_detail_text"/>
             <ImageView
                 android:id="@+id/image_end"
                 android:layout_width="match_parent"

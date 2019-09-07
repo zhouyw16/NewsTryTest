@@ -21,11 +21,15 @@ import android.widget.Toast;
 import com.java.chtzyw.R;
 import com.java.chtzyw.data.*;
 
+import java.util.regex.Pattern;
+
 import cn.sharesdk.onekeyshare.OnekeyShare;
 
 public class NewsDetailActivity extends AppCompatActivity {
 
     private News news;
+    private boolean isFavoured;
+    private Menu mMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,23 +42,42 @@ public class NewsDetailActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         news=(News)getIntent().getSerializableExtra("news_detail");
-        TextView textTitle=(TextView)findViewById(R.id.text_title);
-        TextView textIntro=(TextView)findViewById(R.id.text_intro);
-        TextView textContent=(TextView)findViewById(R.id.text_content);
+        setNews();
+        isFavoured = NewsHandler.getHandler().sendIsFavouredRequest(news);
+    }
+
+    private void setNews() {
+        System.out.println(news.getNewsID());
+
+        TextView textTitle=findViewById(R.id.text_title);
+        TextView textIntro=findViewById(R.id.text_intro);
+        TextView textContent=findViewById(R.id.text_content);
         textTitle.setText(news.getTitle());
-        textIntro.setText(news.getPublisher()+"\t"+news.getPublishTime());
-        textContent.setText(news.getContent());
-        ImageView imageStart=(ImageView)findViewById(R.id.image_start);
-        ImageView imageEnd=(ImageView)findViewById(R.id.image_end);
+        textIntro.setText(news.getPublisher()+" "+news.getPublishTime());
+
+        StringBuilder content = new StringBuilder();
+        for (String line : news.getContent().split("\n")) {
+            if (line.length() == 0 || Pattern.matches("\\s+", line)) continue;
+            if (news.getPublisher().equals("搜狐新闻")) {
+                if (line.startsWith("原标题")) continue;
+                if (line.startsWith("责任编辑")) continue;
+                if (line.startsWith("返回搜狐，查看更多")) continue;
+            }
+            content.append(line).append("\n\n");
+        }
+
+        textContent.setText(content);
+        ImageView imageStart= findViewById(R.id.image_start);
+        ImageView imageEnd= findViewById(R.id.image_end);
         String[] images=news.getImages();
         if(images==null){
             imageStart.setVisibility(View.GONE);
             imageEnd.setVisibility(View.GONE);
         }
         else if(images.length==1) {
-            imageStart.setVisibility(View.GONE);
-            imageEnd.setVisibility(View.VISIBLE);
-            Glide.with(this).load(images[0]).apply(ImageOption.fitImgOption()).into(imageEnd);
+            imageStart.setVisibility(View.VISIBLE);
+            imageEnd.setVisibility(View.GONE);
+            Glide.with(this).load(images[0]).apply(ImageOption.fitImgOption()).into(imageStart);
         }
         else{
             imageStart.setVisibility(View.VISIBLE);
@@ -62,12 +85,20 @@ public class NewsDetailActivity extends AppCompatActivity {
             Glide.with(this).load(images[0]).apply(ImageOption.fitImgOption()).into(imageStart);
             Glide.with(this).load(images[1]).apply(ImageOption.fitImgOption()).into(imageEnd);
         }
+
     }
 
     /*显示右上方三点按钮*/
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.detail_toolbar, menu);
+        if (isFavoured) {
+            menu.findItem(R.id.action_favor).setIcon(getDrawable(R.drawable.ic_favorite));
+        }
+        else {
+            menu.findItem(R.id.action_favor).setIcon(getDrawable(R.drawable.ic_favorite_border));
+        }
+        mMenu = menu;
         return true;
     }
 
@@ -78,16 +109,19 @@ public class NewsDetailActivity extends AppCompatActivity {
 
         if(id==android.R.id.home){
             finish();
-            return true;
         }
         else if (id == R.id.action_favor) {
-            if (NewsHandler.getHandler().sendFavorSaveRequest(news)) {
+            isFavoured = !isFavoured;
+            if (isFavoured) {
+                NewsHandler.getHandler().sendFavorSaveRequest(news);
                 Toast.makeText(this, "收藏成功", Toast.LENGTH_SHORT).show();
+                mMenu.findItem(R.id.action_favor).setIcon(getDrawable(R.drawable.ic_favorite));
             }
             else {
-                Toast.makeText(this, "已在收藏列表中", Toast.LENGTH_SHORT).show();
+                NewsHandler.getHandler().sendFavorDeleteRequest(news);
+                Toast.makeText(this, "取消收藏", Toast.LENGTH_SHORT).show();
+                mMenu.findItem(R.id.action_favor).setIcon(getDrawable(R.drawable.ic_favorite_border));
             }
-            return true;
         }
         else if (id==R.id.action_share) {
             OnekeyShare oks = new OnekeyShare();
@@ -104,7 +138,6 @@ public class NewsDetailActivity extends AppCompatActivity {
             oks.setUrl("http://sharesdk.cn");
             // 启动分享GUI
             oks.show(this);
-            return true;
         }
         return true;
     }
