@@ -5,9 +5,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.java.chtzyw.R;
+import com.java.chtzyw.data.ImageOption;
 import com.java.chtzyw.data.News;
 import com.java.chtzyw.data.NewsHandler;
 import com.java.chtzyw.data.ResultListener;
@@ -38,6 +40,12 @@ public class SearchActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
+
+        WindowManager.LayoutParams localLayoutParams = getWindow().getAttributes();
+        float f = ImageOption.nightMode ? 0 / 255.0F : 123 / 255.0F;
+        localLayoutParams.screenBrightness = f;
+        getWindow().setAttributes(localLayoutParams);
+
         switchToHistory();
     }
 

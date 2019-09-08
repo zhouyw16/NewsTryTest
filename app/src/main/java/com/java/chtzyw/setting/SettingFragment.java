@@ -18,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -84,12 +85,10 @@ public class SettingFragment extends Fragment {
         CardView noImage = view.findViewById(R.id.no_image_button);
         TextView noImageText = view.findViewById(R.id.no_image_button_text);
         if (ImageOption.noImage) {
-            Toast.makeText(getContext(), "设置为无图模式", Toast.LENGTH_SHORT).show();
             noImage.setCardBackgroundColor(getContext().getColor(R.color.colorTagSelectedBg));
             noImageText.setTextColor(getContext().getColor(R.color.colorTagSelectedText));
         }
         else {
-            Toast.makeText(getContext(), "取消无图模式", Toast.LENGTH_SHORT).show();
             noImage.setCardBackgroundColor(getContext().getColor(R.color.colorTagBg));
             noImageText.setTextColor(getContext().getColor(R.color.colorTagText));
         }
@@ -107,6 +106,33 @@ public class SettingFragment extends Fragment {
                         noImageText.setTextColor(getContext().getColor(R.color.colorTagText));
                     }
                 });
+
+
+        CardView nightMode = view.findViewById(R.id.night_mode_button);
+        TextView nightModeText = view.findViewById(R.id.night_mode_button_text);
+        RxView.clicks(nightMode).throttleFirst(500, TimeUnit.MILLISECONDS)
+                .subscribe((dummy) -> {
+                    ImageOption.nightMode = !ImageOption.nightMode;
+                    if (ImageOption.nightMode) {
+                        Toast.makeText(getContext(), "设置为夜间模式", Toast.LENGTH_SHORT).show();
+                        nightMode.setCardBackgroundColor(getContext().getColor(R.color.colorTagSelectedBg));
+                        nightModeText.setTextColor(getContext().getColor(R.color.colorTagSelectedText));
+                        WindowManager.LayoutParams localLayoutParams = getActivity().getWindow().getAttributes();
+                        float f =0 / 255.0F;
+                        localLayoutParams.screenBrightness = f;
+                        getActivity().getWindow().setAttributes(localLayoutParams);
+                    }
+                    else {
+                        Toast.makeText(getContext(), "取消夜间模式", Toast.LENGTH_SHORT).show();
+                        nightMode.setCardBackgroundColor(getContext().getColor(R.color.colorTagBg));
+                        nightModeText.setTextColor(getContext().getColor(R.color.colorTagText));
+                        WindowManager.LayoutParams localLayoutParams = getActivity().getWindow().getAttributes();
+                        float f = 123 / 255.0F;
+                        localLayoutParams.screenBrightness = f;
+                        getActivity().getWindow().setAttributes(localLayoutParams);
+                    }
+                });
+
 
         // 使用recyclerview管理网格布局
         RecyclerView recyclerView = view.findViewById(R.id.tag_setting_list);

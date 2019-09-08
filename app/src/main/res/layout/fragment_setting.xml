@@ -31,7 +31,8 @@
                 android:id="@+id/clear_cache_button_text"
                 android:text="@string/clear_cache_button_text"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorTagText"/>
 
         </androidx.cardview.widget.CardView>
 
@@ -55,6 +56,32 @@
             <TextView
                 android:id="@+id/no_image_button_text"
                 android:text="无图模式"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/colorTagText"/>
+
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/night_mode_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:clickable="true"
+            android:foreground="?attr/selectableItemBackground"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="2dp"
+            app:contentPaddingBottom="16dp"
+            app:contentPaddingLeft="12dp"
+            app:contentPaddingRight="12dp"
+            app:contentPaddingTop="16dp">
+
+            <TextView
+                android:id="@+id/night_mode_button_text"
+                android:text="夜间模式"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/colorTagText"/>

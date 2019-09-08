@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -40,8 +41,6 @@ public class NewsListFragment extends Fragment {
     private Context mContext;
 
     private boolean gestureUp = false;     // 是否为上拉刷新的手势
-    private int lastClickedPosition = -1;  // 上次点击的新闻位置
-
 
     public NewsListFragment() {}
 
@@ -68,7 +67,7 @@ public class NewsListFragment extends Fragment {
         });
         mContext = getContext();
 
-        // 如果本地没有缓存，则初始先加载一批新闻
+//         如果本地没有缓存，则初始先加载一批新闻
         if (mAdapter.getItemCount() == 0)
             mPresenter.firstGet();
     }

@@ -6,6 +6,7 @@ import com.java.chtzyw.R;
 
 public class ImageOption {
     public static boolean noImage = false;
+    public static boolean nightMode = false;
 
     private static RequestOptions miniOption = new RequestOptions()
             .placeholder(R.drawable.sample_pic)

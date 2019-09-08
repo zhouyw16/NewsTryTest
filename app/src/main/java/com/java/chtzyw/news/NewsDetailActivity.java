@@ -13,6 +13,7 @@ import android.os.StrictMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -101,6 +102,10 @@ public class NewsDetailActivity extends AppCompatActivity {
             Glide.with(this).load(images[1]).apply(ImageOption.fitImgOption()).into(imageEnd);
         }
 
+        WindowManager.LayoutParams localLayoutParams = getWindow().getAttributes();
+        float f = ImageOption.nightMode ? 0 / 255.0F : 123 / 255.0F;
+        localLayoutParams.screenBrightness = f;
+        getWindow().setAttributes(localLayoutParams);
     }
 
     @Override
