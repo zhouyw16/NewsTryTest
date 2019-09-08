@@ -172,7 +172,11 @@ class NewsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             int color = news.getHasRead() ? currContext.getColor(R.color.card_title_hasread)
                     : currContext.getColor(R.color.card_title);
             mTitle.setTextColor(color);
-            if (news.getVideo().isEmpty()) {
+            if (ImageOption.noImage) {
+                mVideo.setVisibility(View.GONE);
+                mImage.setVisibility(View.GONE);
+            }
+            else if (news.getVideo().isEmpty()) {
                 mImage.setVisibility(View.VISIBLE);
                 mVideo.setVisibility(View.GONE);
                 setImage(news.getCover());

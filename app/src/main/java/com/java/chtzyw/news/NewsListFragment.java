@@ -128,8 +128,12 @@ public class NewsListFragment extends Fragment {
 
         if (newsNum != 0 && mode == GET_NEW)
             recyclerView.smoothScrollToPosition(0);
-        else if (mode == GET_MORE)
-            mAdapter.setFooterVisibility(false);
+        else if (mode == GET_MORE) {
+            new Handler().post(() -> {
+                while(recyclerView.getScrollState() != RecyclerView.SCROLL_STATE_IDLE) ;
+                mAdapter.setFooterVisibility(false);
+            });
+        }
         swipeRefreshLayout.setRefreshing(false);
     }
 
@@ -140,6 +144,7 @@ public class NewsListFragment extends Fragment {
             swipeRefreshLayout.setRefreshing(false);
             if (mode == GET_MORE) {
                 new Handler().postDelayed(() -> {
+                    while(recyclerView.getScrollState() != RecyclerView.SCROLL_STATE_IDLE) ;
                     mAdapter.setFooterVisibility(false);
                 }, 100);
             }

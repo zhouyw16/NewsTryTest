@@ -37,6 +37,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"/>
+
+            <cn.jzvd.JzvdStd
+                android:id="@+id/news_video"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:visibility="gone">
+            </cn.jzvd.JzvdStd>
+
             <TextView
                 android:id="@+id/text_content"
                 android:layout_width="match_parent"

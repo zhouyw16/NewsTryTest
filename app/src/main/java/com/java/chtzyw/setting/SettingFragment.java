@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.jakewharton.rxbinding2.view.RxView;
 import com.java.chtzyw.R;
+import com.java.chtzyw.data.ImageOption;
 import com.java.chtzyw.data.NewsHandler;
 import com.java.chtzyw.data.TagManager;
 
@@ -56,6 +57,33 @@ public class SettingFragment extends Fragment {
                 .subscribe((dummy) -> {
                     Toast.makeText(getContext(), "已清空本地缓存", Toast.LENGTH_SHORT).show();
                     NewsHandler.getHandler().sendDeleteCacheRequest();
+                });
+
+        CardView noImage = view.findViewById(R.id.no_image_button);
+        TextView noImageText = view.findViewById(R.id.no_image_button_text);
+        if (ImageOption.noImage) {
+            Toast.makeText(getContext(), "设置为无图模式", Toast.LENGTH_SHORT).show();
+            noImage.setCardBackgroundColor(getContext().getColor(R.color.colorTagSelectedBg));
+            noImageText.setTextColor(getContext().getColor(R.color.colorTagSelectedText));
+        }
+        else {
+            Toast.makeText(getContext(), "取消无图模式", Toast.LENGTH_SHORT).show();
+            noImage.setCardBackgroundColor(getContext().getColor(R.color.colorTagBg));
+            noImageText.setTextColor(getContext().getColor(R.color.colorTagText));
+        }
+        RxView.clicks(noImage).throttleFirst(500, TimeUnit.MILLISECONDS)
+                .subscribe((dummy) -> {
+                    ImageOption.noImage = !ImageOption.noImage;
+                    if (ImageOption.noImage) {
+                        Toast.makeText(getContext(), "设置为无图模式", Toast.LENGTH_SHORT).show();
+                        noImage.setCardBackgroundColor(getContext().getColor(R.color.colorTagSelectedBg));
+                        noImageText.setTextColor(getContext().getColor(R.color.colorTagSelectedText));
+                    }
+                    else {
+                        Toast.makeText(getContext(), "取消无图模式", Toast.LENGTH_SHORT).show();
+                        noImage.setCardBackgroundColor(getContext().getColor(R.color.colorTagBg));
+                        noImageText.setTextColor(getContext().getColor(R.color.colorTagText));
+                    }
                 });
 
         // 使用recyclerview管理网格布局

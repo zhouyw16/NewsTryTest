@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.PointF;
+import android.media.Image;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -199,7 +200,11 @@ public class FavouriteFragment extends Fragment {
                 mTitle.setText(news.getTitle());
                 mAuthor.setText(news.getPublisher());
                 mDate.setText(news.getPublishTime());
-                if (news.getVideo().isEmpty()) {
+                if (ImageOption.noImage) {
+                    mVideo.setVisibility(View.GONE);
+                    mImage.setVisibility(View.GONE);
+                }
+                else if (news.getVideo().isEmpty()) {
                     mImage.setVisibility(View.VISIBLE);
                     mVideo.setVisibility(View.GONE);
                     setImage(news.getCover());

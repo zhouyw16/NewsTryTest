@@ -291,8 +291,10 @@ public class NewsHandler {
         }
 
         void onFinal() {
-
-            if (!complete) listener.onFailure(-1);
+            if (!complete) {
+                listener.onFailure(-1);
+                return;
+            }
             int tag = 1;
             int pastSize = allNewsList.get(tag).size();
             for (News news : result) {

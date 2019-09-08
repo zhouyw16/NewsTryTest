@@ -26,6 +26,7 @@ import com.java.chtzyw.data.*;
 
 import java.util.regex.Pattern;
 
+import cn.jzvd.JzvdStd;
 import cn.sharesdk.onekeyshare.OnekeyShare;
 
 public class NewsDetailActivity extends AppCompatActivity {
@@ -76,8 +77,20 @@ public class NewsDetailActivity extends AppCompatActivity {
         textContent.setText(content);
         ImageView imageStart= findViewById(R.id.image_start);
         ImageView imageEnd= findViewById(R.id.image_end);
+        JzvdStd videoView = findViewById(R.id.news_video);
         String[] images=news.getImages();
-        if(images==null){
+        if (ImageOption.noImage) {
+            videoView.setVisibility(View.GONE);
+            imageStart.setVisibility(View.GONE);
+            imageEnd.setVisibility(View.GONE);
+        }
+        else if (!news.getVideo().isEmpty()) {
+            videoView.setVisibility(View.VISIBLE);
+            imageStart.setVisibility(View.GONE);
+            imageEnd.setVisibility(View.GONE);
+            videoView.setUp(news.getVideo(), news.getTitle());
+        }
+        else if(images==null){
             imageStart.setVisibility(View.GONE);
             imageEnd.setVisibility(View.GONE);
         }

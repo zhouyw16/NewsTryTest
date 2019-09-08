@@ -5,6 +5,8 @@ import com.bumptech.glide.request.RequestOptions;
 import com.java.chtzyw.R;
 
 public class ImageOption {
+    public static boolean noImage = false;
+
     private static RequestOptions miniOption = new RequestOptions()
             .placeholder(R.drawable.sample_pic)
             .diskCacheStrategy(DiskCacheStrategy.NONE)

@@ -30,6 +30,7 @@ public class MainActivity extends AppCompatActivity
     private Toolbar mToolBar;                       // 工具栏
     private Fragment mNews, mFavourite, mSetting;   // 导航栏的各种不同页面
     private NavigationView mNavigationView;         // 导航栏
+    private boolean firstCreate = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +50,15 @@ public class MainActivity extends AppCompatActivity
         // 设置导航栏切换的回调函数
         mNavigationView.setNavigationItemSelectedListener(this);
         switchNavigation(currNavigationId);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (firstCreate) {
+            firstCreate = false;
+            mToolBar.setTitle("新闻");
+        }
     }
 
     // 返回键回退导航栏

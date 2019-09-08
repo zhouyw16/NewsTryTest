@@ -127,7 +127,11 @@ public class ResultFragment extends Fragment {
                 mTitle.setText(news.getTitle());
                 mAuthor.setText(news.getPublisher());
                 mDate.setText(news.getPublishTime());
-                if (news.getVideo().isEmpty()) {
+                if (ImageOption.noImage) {
+                    mVideo.setVisibility(View.GONE);
+                    mImage.setVisibility(View.GONE);
+                }
+                else if (news.getVideo().isEmpty()) {
                     mImage.setVisibility(View.VISIBLE);
                     mVideo.setVisibility(View.GONE);
                     setImage(news.getCover());
