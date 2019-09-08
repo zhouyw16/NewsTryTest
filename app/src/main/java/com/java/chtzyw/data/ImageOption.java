@@ -9,11 +9,12 @@ public class ImageOption {
     public static boolean nightMode = false;
 
     private static RequestOptions miniOption = new RequestOptions()
-            .placeholder(R.drawable.sample_pic)
+            .placeholder(R.drawable.loading)
             .diskCacheStrategy(DiskCacheStrategy.NONE)
             .override(320, 180);
 
     private static RequestOptions fitOption = new RequestOptions()
+            .placeholder(R.drawable.loading)
             .diskCacheStrategy(DiskCacheStrategy.RESOURCE);
 
     public static RequestOptions miniImgOption() {return miniOption;}

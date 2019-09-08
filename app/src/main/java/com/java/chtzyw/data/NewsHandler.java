@@ -384,7 +384,12 @@ public class NewsHandler {
     public boolean sendFavorDeleteRequest(News news){
         File path=mContext.getDir("favor",Context.MODE_PRIVATE);
         File file=new File(path,news.getNewsID());
-        return favorList.remove(news) && favorHash.remove(news.getNewsID()) && file.delete();
+
+        System.out.println(favorList.remove(news));
+        for (News t : favorList) {
+            System.out.println(t.getTitle());
+        }
+        return  favorHash.remove(news.getNewsID()) && file.delete();
     }
 
     /*加载收藏请求*/

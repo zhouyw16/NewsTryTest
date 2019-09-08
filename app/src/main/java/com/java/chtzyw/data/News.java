@@ -33,6 +33,12 @@ public class News implements Serializable {
         else
             return images[0];
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return this.newsID.equals(((News) obj).getNewsID());
+    }
+
     public String[] getImages(){
         String[] images=image.split(",");
         if(images.length==0||images[0].isEmpty())

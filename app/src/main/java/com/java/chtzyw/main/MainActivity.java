@@ -60,6 +60,8 @@ public class MainActivity extends AppCompatActivity
             firstCreate = false;
             mToolBar.setTitle("新闻");
         }
+        if (currNavigationId == R.id.nav_favourite)
+            switchNavigation(currNavigationId);
     }
 
     // 返回键回退导航栏
@@ -133,9 +135,10 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void switchToFavourite() {
+        System.out.println("switchcalled");
         switchTo(R.id.nav_favourite, "收藏");
-        if (mFavourite == null)
-            mFavourite = FavouriteFragment.newInstance();
+
+        mFavourite = FavouriteFragment.newInstance();
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.frame_content, mFavourite).commit();
     }

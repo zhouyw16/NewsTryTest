@@ -110,6 +110,14 @@ public class SettingFragment extends Fragment {
 
         CardView nightMode = view.findViewById(R.id.night_mode_button);
         TextView nightModeText = view.findViewById(R.id.night_mode_button_text);
+        if (ImageOption.nightMode) {
+            nightMode.setCardBackgroundColor(getContext().getColor(R.color.colorTagSelectedBg));
+            nightModeText.setTextColor(getContext().getColor(R.color.colorTagSelectedText));
+        }
+        else {
+            nightMode.setCardBackgroundColor(getContext().getColor(R.color.colorTagBg));
+            nightModeText.setTextColor(getContext().getColor(R.color.colorTagText));
+        }
         RxView.clicks(nightMode).throttleFirst(500, TimeUnit.MILLISECONDS)
                 .subscribe((dummy) -> {
                     ImageOption.nightMode = !ImageOption.nightMode;
